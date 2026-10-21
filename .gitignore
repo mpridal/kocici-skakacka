@@ -3,3 +3,4 @@ docs/specs/
 .private-names
 .superpowers/
 node_modules/
+.claude/

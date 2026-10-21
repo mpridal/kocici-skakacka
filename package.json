@@ -1,0 +1,12 @@
+{
+  "name": "kocici-skakacka",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Kočičí skákačka – offline hra pro tablet",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "serve": "node tools/serve.mjs",
+    "check-names": "node tools/check-names.mjs"
+  }
+}
