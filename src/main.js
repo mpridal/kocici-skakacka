@@ -5,6 +5,9 @@ import { createInput } from './input.js';
 import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
+import { drawObstacle, drawGameCat } from './art/scene.js';
+
+const debugBoxes = new URLSearchParams(location.search).has('boxes');
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -40,18 +43,18 @@ function draw() {
   ctx.fillStyle = '#F7E6C4';
   ctx.fillRect(0, CONFIG.groundY, LOGICAL_W, LOGICAL_H - CONFIG.groundY);
 
-  // Zástupné tvary (nahradí je grafika v dalším kroku).
-  for (const o of game.obstacles) {
-    if (!o.active) continue;
-    obstacleHitbox(o, box);
-    ctx.fillStyle = o.kind === 'squirrel' ? '#C7743A' : '#6FA552';
-    ctx.fillRect(box.x, box.y, box.w, box.h);
-  }
-  catHitbox(game.cat, box);
-  const blink = game.invuln > 0 && Math.floor(game.time * 10) % 2 === 0;
-  if (!blink) {
-    ctx.fillStyle = '#B9BAC2';
-    ctx.fillRect(box.x, box.y, box.w, box.h);
+  for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);
+  drawGameCat(ctx, game, CONFIG.skins[0]);
+  if (debugBoxes) {
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+    for (const o of game.obstacles) {
+      if (!o.active) continue;
+      obstacleHitbox(o, box);
+      ctx.strokeRect(box.x, box.y, box.w, box.h);
+    }
+    catHitbox(game.cat, box);
+    ctx.strokeRect(box.x, box.y, box.w, box.h);
   }
 
   ctx.fillStyle = '#3A2F45';

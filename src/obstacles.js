@@ -63,6 +63,21 @@ export function randomBlink(rng) {
   return 1.2 + rng() * 3.8;
 }
 
+const BLINK_CLOSED = 0.13;
+const DOUBLE_BLINK_GAP = 0.18;
+
+// Mrkání avokáda: každé má vlastní odpočet, občas mrkne dvakrát za sebou.
+export function updateBlink(o, dt, rng) {
+  if (o.blinkLeft > 0) o.blinkLeft = Math.max(0, o.blinkLeft - dt);
+  o.blinkTimer -= dt;
+  if (o.blinkTimer <= 0) {
+    o.blinkLeft = BLINK_CLOSED;
+    o.blinkTimer = rng() < 0.25 ? BLINK_CLOSED + DOUBLE_BLINK_GAP : randomBlink(rng);
+  }
+}
+
+export const eyesClosed = (o) => o.blinkLeft > 0;
+
 const LANES = ['low', 'mid', 'high'];
 
 export function createSpawner(rng = Math.random) {
@@ -88,6 +103,7 @@ export function createSpawner(rng = Math.random) {
         if (!ob.active) continue;
         ob.x -= dx;
         ob.animTime += dt;
+        if (ob.kind !== 'squirrel') updateBlink(ob, dt, rng);
         if (ob.x + ob.w < DESPAWN_X) ob.active = false;
       }
       if (distance < nextAt) return;

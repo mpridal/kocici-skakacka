@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Galerie postaviček</title>
+<style>body{margin:0;background:#fff}canvas{display:block;width:100%;max-width:1280px}</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script type="module">
+import { CONFIG } from '../src/config.js';
+import { drawCat } from '../src/art/cat.js';
+import { drawAvocado } from '../src/art/avocado.js';
+import { drawSquirrel } from '../src/art/squirrel.js';
+import { drawFish } from '../src/art/fish.js';
+import { drawHeart } from '../src/art/heart.js';
+
+const ctx = document.getElementById('c').getContext('2d');
+const poses = ['run', 'jump', 'hurt', 'blink'];
+function frame(now) {
+  const t = now / 1000;
+  ctx.clearRect(0, 0, 1280, 720);
+  ctx.fillStyle = '#CDEBFA';
+  ctx.fillRect(0, 0, 1280, 720);
+  CONFIG.skins.forEach((skin, i) => drawCat(ctx, 130 + i * 250, 150, 1.5, skin, 'run', t));
+  poses.forEach((p, i) => drawCat(ctx, 160 + i * 300, 330, 1.5, CONFIG.skins[0], p, t));
+  drawAvocado(ctx, 120, 520, 1.3 * 0.72, Math.floor(t) % 3 === 0);
+  drawAvocado(ctx, 240, 520, 1.3, Math.floor(t * 1.3) % 4 === 0);
+  drawSquirrel(ctx, 450, 470, 1.1, t);
+  drawSquirrel(ctx, 600, 470, 2.5, t);
+  drawFish(ctx, 800, 470, 1.5, t, 0);
+  drawFish(ctx, 900, 470, 3, t, 0.16);
+  drawHeart(ctx, 1050, 470, 2.5, '#FF8FA5');
+  drawHeart(ctx, 1150, 470, 2.5, null);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

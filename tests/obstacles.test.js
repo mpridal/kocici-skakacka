@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.js';
 import { createCat, updateCat, catHitbox, jumpAirtime } from '../src/cat.js';
 import { overlaps } from '../src/collision.js';
-import { createObstaclePool, createSpawner, obstacleHitbox, makeObstacle } from '../src/obstacles.js';
+import {
+  createObstaclePool, createSpawner, obstacleHitbox, makeObstacle, randomBlink, updateBlink, eyesClosed,
+} from '../src/obstacles.js';
 
 function seeded(seed) {
   let s = seed >>> 0;
@@ -113,6 +115,30 @@ test('každá překážka je zvládnutelná a dráhy veverek fungují jak mají'
     assert.ok(canPass(mid, full, speed), `střední veverka vyšším skokem @${speed}`);
     assert.equal(hitsWhenRunning(high, speed), false, 'pod vysokou veverkou jde proběhnout');
   }
+});
+
+test('avokáda mrkají každé samo a oči zavřou na 0,13 s', () => {
+  const rng = seeded(42);
+  const a = makeObstacle('avo-big', null);
+  const b = makeObstacle('avo-big', null);
+  a.blinkTimer = randomBlink(rng);
+  b.blinkTimer = randomBlink(rng);
+  const dt = 1 / 120;
+  const closedA = [];
+  const closedB = [];
+  let run = 0;
+  let longest = 0;
+  for (let i = 0; i < 120 * 20; i++) {
+    updateBlink(a, dt, rng);
+    updateBlink(b, dt, rng);
+    closedA.push(eyesClosed(a));
+    closedB.push(eyesClosed(b));
+    run = eyesClosed(a) ? run + 1 : 0;
+    longest = Math.max(longest, run);
+  }
+  assert.ok(closedA.some(Boolean) && closedB.some(Boolean), 'obě avokáda mrknou');
+  assert.notDeepEqual(closedA, closedB, 'nemrkají současně');
+  assert.ok(Math.abs(longest * dt - 0.13) <= dt + 1e-9, `zavřené ${longest * dt}`);
 });
 
 test('plný pool nealokuje a spawn počká', () => {
