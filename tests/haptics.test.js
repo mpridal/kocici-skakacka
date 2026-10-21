@@ -26,3 +26,9 @@ test('zařízení bez vibrace ani chyba prohlížeče hru neshodí', () => {
   assert.doesNotThrow(() => vibrateFor('hit', undefined));
   assert.doesNotThrow(() => vibrateFor('hit', { vibrate() { throw new Error('blocked'); } }));
 });
+
+test('vibrace jsou dost dlouhé, aby byly cítit i na slabším motorku', () => {
+  const buzz = (p) => p.filter((_, i) => i % 2 === 0); // sudé položky = vibrace, liché = pauzy
+  assert.ok(Math.min(...buzz(PATTERNS.hit)) >= 150, 'ztráta života aspoň 150 ms');
+  assert.ok(Math.min(...buzz(PATTERNS.over)) >= 250, 'konec hry aspoň 250 ms na pulz');
+});
