@@ -1,0 +1,63 @@
+# Kočičí skákačka 🐱
+
+Jednoduchá hra pro děti na Android tablet. Kočička běží, skáče přes avokáda, podbíhá nebo přeskakuje veverky a chytá rybičky. Má 3 srdíčka, takže jedna chyba hru neukončí.
+
+- Ovládání: **ťuknutí kamkoliv = skok**, delší podržení = vyšší skok.
+- Na PC: mezerník nebo šipka nahoru (a klik myší).
+- Hraje se na šířku a **bez internetu** (po první instalaci).
+- Žádné reklamy, účty ani sledování. Vše zůstává v tabletu.
+
+## Pro rodiče
+
+### 1. Nasazení na GitHub (jednou)
+
+1. Na github.com vytvořte **veřejný** repozitář `kocici-skakacka` a nahrajte do něj obsah této složky.
+2. V repozitáři otevřete **Settings → Pages** a jako **Source** zvolte **GitHub Actions**.
+3. Po každém nahrání změn (push do větve `main`) se spustí testy a hra se sama nasadí. Průběh je vidět na záložce **Actions**.
+4. Hra pak běží na adrese `https://<váš-účet>.github.io/kocici-skakacka/`.
+
+### 2. Instalace na tablet (potřebuje internet jen jednou)
+
+1. Na tabletu otevřete adresu hry v **Chrome**.
+2. Počkejte, až se úvodní obrazovka načte (hra se při tom uloží do tabletu).
+3. V menu Chrome (⋮) zvolte **Přidat na plochu** nebo **Nainstalovat aplikaci**.
+4. Hru pak spouštějte ikonou kočičky na ploše. Funguje i v režimu letadlo.
+
+### 3. Jméno dítěte
+
+Na úvodní obrazovce je vpravo dole malé ozubené kolečko. **Podržte ho asi 2 sekundy.** Otevře se okno pro rodiče, kde jde zadat jméno (max. 12 znaků). Hra pak dítě pozdraví a pochválí při rekordu. Jméno se ukládá jen v tabletu, nikam se neodesílá.
+
+### 4. Aktualizace
+
+Když nahrajete novou verzi na GitHub a tablet bude připojený k internetu, nová verze se stáhne na pozadí. Projeví se při **dalším spuštění** hry (aplikaci je potřeba úplně zavřít, např. odsunutím z přehledu aplikací). Rozehraná hra se nikdy nepřeruší.
+
+### 5. Úprava obtížnosti
+
+Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůležitější:
+
+| Nastavení | Co dělá | Výchozí |
+|---|---|---|
+| `speed.start` | počáteční rychlost běhu | 330 |
+| `speed.max` | nejvyšší rychlost (strop) | 560 |
+| `speed.gainPerPoint` | jak rychle hra zrychluje | 0.15 |
+| `cat.jumpVelocity` | síla odrazu (výška skoku) | 980 |
+| `cat.maxHoldTime` | jak dlouho jde skok prodlužovat držením | 0.3 s |
+| `cat.hitboxShrinkX` / `Y` | o kolik je kolize shovívavější než obrázek | 0.4 / 0.25 |
+| `lives.start` / `lives.max` | počet srdíček na začátku / maximum | 3 / 5 |
+| `lives.invulnTime` | jak dlouho kočička po zásahu bliká a nic ji nezraní | 2 s |
+| `obstacles.reactionTime` | rezerva na reakci mezi překážkami | 0.45 s |
+| `obstacles.extraGapMin` / `Max` | náhodná mezera navíc mezi překážkami | 0.2–1.2 s |
+| `obstacles.squirrelFromScore` | od kolika bodů létají veverky | 300 |
+| `pickups.fishChance` | jak často se objeví rybičky | 0.5 |
+| `pickups.heartChance` | jak často se objeví srdíčko | 0.04 |
+| `dayNight.cyclePoints` | po kolika bodech se střídá den a noc | 700 |
+
+Po úpravě spusťte testy (`npm test`), které hlídají, že hra zůstane férová (vždy dost místa na skok).
+
+## Pro vývoj
+
+- `npm run serve` spustí místní server na http://localhost:8080/.
+- `npm test` spustí testy (Node 22+ bez dalších balíčků).
+- Užitečné parametry adresy: `?nosw` (bez offline cache), `?boxes` (zobrazí kolizní boxy), `?fast` (rychlé střídání dne a noci).
+- `tools/gallery.html` ukáže všechny postavičky a animace. `tools/make-icons.html?save` znovu vyrobí ikony.
+- Pokud vývojový prohlížeč drží starou verzi, odregistrujte service worker (DevTools → Application → Service workers).
