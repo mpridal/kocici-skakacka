@@ -64,6 +64,8 @@ export const CONFIG = deepFreeze({
 
   dayNight: { cyclePoints: 700 },
 
+  tutorial: { untilScore: 150 }, // nápověda ťukni/podrž, dokud hráč jednou nedosáhne tolika bodů
+
   ui: { gameOverDelay: 1, parentHoldTime: 2, nameMaxLength: 12 },
 
   skins: [

@@ -16,6 +16,7 @@ function sanitize(raw) {
     skin: SKIN_IDS.includes(r.skin) ? r.skin : SKIN_IDS[0],
     muted: r.muted === true,
     name: cleanName(r.name),
+    tutorialDone: r.tutorialDone === true,
   };
 }
 
@@ -42,7 +43,7 @@ export function createStorage(...args) {
         persist();
       }
     },
-    getSettings: () => ({ skin: state.skin, muted: state.muted, name: state.name }),
+    getSettings: () => ({ skin: state.skin, muted: state.muted, name: state.name, tutorialDone: state.tutorialDone }),
     saveSettings(partial) {
       state = sanitize({ ...state, ...partial, name: cleanName(partial.name ?? state.name) });
       persist();

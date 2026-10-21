@@ -11,7 +11,7 @@ function memoryBackend(initial = {}) {
   };
 }
 
-const DEFAULTS = { skin: 'mourek', muted: false, name: '' };
+const DEFAULTS = { skin: 'mourek', muted: false, name: '', tutorialDone: false };
 
 test('prázdné úložiště vrací výchozí hodnoty', () => {
   const s = createStorage(memoryBackend());
@@ -33,7 +33,7 @@ test('uložení jména zachová ostatní nastavení a jméno ořízne', () => {
   const s = createStorage(memoryBackend());
   s.saveSettings({ skin: 'zrzka' });
   s.saveSettings({ name: '  Ema  ' });
-  assert.deepEqual(s.getSettings(), { skin: 'zrzka', muted: false, name: 'Ema' });
+  assert.deepEqual(s.getSettings(), { ...DEFAULTS, skin: 'zrzka', name: 'Ema' });
   s.saveSettings({ name: 'Emanuela-Kristýna' });
   assert.equal(s.getSettings().name, 'Emanuela-Kri');
 });

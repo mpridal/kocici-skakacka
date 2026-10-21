@@ -286,6 +286,41 @@ export function drawLevelUp(ctx, age, cx) {
   ctx.restore();
 }
 
+// Nápověda pro začátečníka: ručička ťuká (tap) nebo drží (hold) a velký nápis.
+export function drawHint(ctx, kind, t, cx) {
+  if (!kind) return;
+  const hold = kind === 'hold';
+  const press = hold ? Math.min(1, (t % 1.4) / 0.25) : Math.abs(Math.sin(t * 6));
+  ctx.save();
+  ctx.translate(cx, 300);
+  text(ctx, hold ? 'Podrž prst!' : 'Ťukni!', 0, -70, 64, { color: '#D4537E' });
+  // ručička ukazuje prstem dolů na displej; při stisku se posune dolů a pod prstem se rozsvítí kroužek
+  const dy = press * 12;
+  ctx.globalAlpha = 0.35 + 0.35 * press;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(0, 96, 20 + press * (hold ? 18 : 9), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#FFE3C9';
+  ctx.strokeStyle = OUTLINE;
+  ctx.lineWidth = 4;
+  roundRect(ctx, -9, 24 + dy, 20, 62, 10);    // ukazováček dolů
+  ctx.fill();
+  ctx.stroke();
+  roundRect(ctx, -30, -22 + dy, 64, 58, 22);  // dlaň se zatnutými prsty
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();                              // klouby zatnutých prstů
+  ctx.moveTo(14, 4 + dy); ctx.lineTo(28, 4 + dy);
+  ctx.moveTo(14, 20 + dy); ctx.lineTo(28, 20 + dy);
+  ctx.stroke();
+  roundRect(ctx, -44, -6 + dy, 22, 34, 11);   // palec stranou
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function drawHud(ctx, game, ui) {
   prepare(ctx);
   const shown = Math.max(game.lives, CONFIG.lives.start);

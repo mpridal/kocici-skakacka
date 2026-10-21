@@ -7,9 +7,10 @@ import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
 import { createUI, layoutButtons } from './ui.js';
-import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawBye, NAME_BOX, DIM } from './ui-draw.js';
+import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawHint, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
+import { hintFor } from './tutorial.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -212,6 +213,7 @@ function draw(now) {
     if (ui.screen === 'playing') {
       drawHud(ctx, game, ui);
       drawLevelUp(ctx, (now - levelUpAt) / 1000, vp.logicalW / 2);
+      if (!ui.settings.tutorialDone) drawHint(ctx, hintFor(game), t, vp.logicalW / 2);
     }
   }
   ctx.restore();
@@ -244,6 +246,10 @@ function handleEvents(now) {
       audio.stopMusic();
       const record = game.score > storage.getBest();
       storage.setBest(game.score);
+      if (game.score >= CONFIG.tutorial.untilScore && !ui.settings.tutorialDone) {
+        storage.saveSettings({ tutorialDone: true });
+        ui.settings = storage.getSettings();
+      }
       ui.gameOver(now, record);
       if (record) {
         spawnConfetti(effects, vp.logicalW);
