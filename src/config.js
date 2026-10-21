@@ -52,7 +52,12 @@ export const CONFIG = deepFreeze({
   // výška spodku veverky nad zemí: low = přeskočit, mid = vyšší skok, high = proběhnout pod ní
   squirrelLanes: { low: 20, mid: 70, high: 110 },
 
-  pickups: { fishChance: 0.5, heartChance: 0.04 },
+  pickups: {
+    fishChance: 0.5,    // šance na oblouk rybiček v mezeře mezi překážkami
+    heartChance: 0.04,  // šance na srdíčko
+    fishScale: 1.5,
+    heartScale: 2.2,
+  },
 
   dayNight: { cyclePoints: 700 },
 

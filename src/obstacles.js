@@ -80,7 +80,8 @@ export const eyesClosed = (o) => o.blinkLeft > 0;
 
 const LANES = ['low', 'mid', 'high'];
 
-export function createSpawner(rng = Math.random) {
+// onGap(startX, gapPx) se zavolá při každém spawnu s volnou mezerou za překážkou.
+export function createSpawner(rng = Math.random, onGap = null) {
   const o = CONFIG.obstacles;
   const minGapTime = jumpAirtime(CONFIG.cat.maxHoldTime) + o.reactionTime;
   let distance = 0;     // uběhnutá vzdálenost
@@ -118,7 +119,9 @@ export function createSpawner(rng = Math.random) {
       slot.blinkTimer = randomBlink(rng);
       slot.blinkLeft = 0;
       const extra = o.extraGapMin + rng() * (o.extraGapMax - o.extraGapMin);
-      nextAt = distance + slot.w + (minGapTime + extra) * speed;
+      const gapPx = (minGapTime + extra) * speed;
+      nextAt = distance + slot.w + gapPx;
+      if (onGap) onGap(SPAWN_X + slot.w, gapPx);
     },
   };
 }

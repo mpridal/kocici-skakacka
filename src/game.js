@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { createCat, updateCat, catHitbox } from './cat.js';
 import { overlaps } from './collision.js';
 import { createObstaclePool, createSpawner, obstacleHitbox } from './obstacles.js';
+import { createPickupPool, placePickups, pickupBox, updatePickups } from './pickups.js';
 
 export function createGame(rng = Math.random) {
   const game = {
@@ -17,10 +18,13 @@ export function createGame(rng = Math.random) {
     time: 0,
     cat: createCat(),
     obstacles: createObstaclePool(),
-    spawner: createSpawner(rng),
+    pickups: createPickupPool(),
+    pickupAt: { x: 0, y: 0 }, // kde byl naposledy sebrán bonus (pro efekt)
+    spawner: null,
     rng,
     events: [],
   };
+  game.spawner = createSpawner(rng, (x, gap) => placePickups(game.pickups, x, gap, rng));
   resetGame(game);
   return game;
 }
@@ -37,6 +41,7 @@ export function resetGame(game) {
   game.time = 0;
   Object.assign(game.cat, createCat());
   for (const o of game.obstacles) o.active = false;
+  for (const p of game.pickups) p.active = false;
   game.spawner.reset();
   game.events.length = 0;
 }
@@ -47,6 +52,26 @@ function updateScore(game) {
 
 const catBox = { x: 0, y: 0, w: 0, h: 0 };
 const obBox = { x: 0, y: 0, w: 0, h: 0 };
+
+function collectPickups(game) {
+  catHitbox(game.cat, catBox);
+  for (const p of game.pickups) {
+    if (!p.active || !overlaps(catBox, pickupBox(p, obBox))) continue;
+    p.active = false;
+    game.pickupAt.x = p.x;
+    game.pickupAt.y = CONFIG.groundY - p.y;
+    if (p.kind === 'fish') {
+      game.fish += 1;
+      game.events.push('fish');
+    } else if (game.lives < CONFIG.lives.max) {
+      game.lives += 1;
+      game.events.push('heart');
+    } else {
+      game.bonus += CONFIG.score.heartBonus;
+      game.events.push('heartBonus');
+    }
+  }
+}
 
 export function stepGame(game, rawDt, held, pressed) {
   game.events.length = 0;
@@ -63,6 +88,8 @@ export function stepGame(game, rawDt, held, pressed) {
 
   game.spawner.update(game.obstacles, dt, game.speed, game.score);
   game.distance += game.speed * dt;
+  updatePickups(game.pickups, game.speed * dt);
+  collectPickups(game);
   updateScore(game);
 
   if (game.invuln > 0) {

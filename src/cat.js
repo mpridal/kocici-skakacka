@@ -77,3 +77,18 @@ export function jumpAirtime(holdTime) {
   }
   return t;
 }
+
+// Nejvyšší výška skoku při držení `holdTime`.
+export function jumpPeak(holdTime) {
+  const cat = createCat();
+  const dt = 1 / 240;
+  updateCat(cat, dt, true, true);
+  let t = dt;
+  let peak = 0;
+  while (!cat.onGround && t < 10) {
+    updateCat(cat, dt, t < holdTime, false);
+    peak = Math.max(peak, cat.y);
+    t += dt;
+  }
+  return peak;
+}

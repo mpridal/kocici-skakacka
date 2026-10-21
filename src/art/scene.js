@@ -4,6 +4,8 @@ import { AVO_ART, SQUIRREL_ART, PAIR_SMALL, PAIR_GAP, eyesClosed } from '../obst
 import { drawAvocado } from './avocado.js';
 import { drawSquirrel } from './squirrel.js';
 import { drawCat } from './cat.js';
+import { drawFish } from './fish.js';
+import { drawHeart } from './heart.js';
 
 export function drawObstacle(ctx, o) {
   const g = CONFIG.groundY;
@@ -25,6 +27,12 @@ export function drawObstacle(ctx, o) {
     const second = o.blinkTimer % 1.7 < 0.13;
     drawAvocado(ctx, o.x + 2 * half + PAIR_GAP * a + half * PAIR_SMALL, g, a * PAIR_SMALL, second);
   }
+}
+
+export function drawPickup(ctx, p, t) {
+  const y = CONFIG.groundY - p.y;
+  if (p.kind === 'fish') drawFish(ctx, p.x, y, CONFIG.pickups.fishScale, t, p.phase);
+  else drawHeart(ctx, p.x, y + Math.sin(t * 3) * 4, CONFIG.pickups.heartScale, '#FF8FA5');
 }
 
 export function drawGameCat(ctx, game, skin) {
