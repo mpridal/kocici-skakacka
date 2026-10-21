@@ -27,7 +27,8 @@ const LAYOUT = {
   ],
   paused: [
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
-    { id: 'home', x: 490, y: 470, w: 300, h: 104 },
+    { id: 'home', x: 390, y: 470, w: 240, h: 104 },
+    { id: 'exit', x: 650, y: 470, w: 240, h: 104 },
   ],
   over: [
     { id: 'again', x: 350, y: 540, w: 280, h: 116 },
@@ -72,6 +73,7 @@ export function createUI(storage, cb = {}) {
     pressed: null,     // id právě stisknutého tlačítka (pro vizuální odezvu)
     holdStart: -1,     // začátek držení ozubeného kolečka
     jumpGuardUntil: 0,
+    byeReturn: 'intro', // kam se vrátí „Hrát dál“ z rozloučení
     settings: storage.getSettings(),
 
     get skinIndex() {
@@ -106,6 +108,7 @@ export function createUI(storage, cb = {}) {
 
     // Rozloučení, když prohlížeč nedovolí okno zavřít.
     showBye(now) {
+      ui.byeReturn = ui.screen === 'paused' ? 'paused' : 'intro';
       ui.go('bye', now);
     },
 
@@ -146,6 +149,7 @@ export function createUI(storage, cb = {}) {
         case 'paused':
           if (id === 'resume') { ui.go('playing', now); call('onResume'); }
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
+          else if (id === 'exit') call('onExit');
           return 'consumed';
         case 'over':
           if (!ui.overButtonsActive(now)) { ui.pressed = null; return 'consumed'; }
@@ -153,7 +157,7 @@ export function createUI(storage, cb = {}) {
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
           return 'consumed';
         case 'bye':
-          if (id === 'stay') ui.go('intro', now);
+          if (id === 'stay') ui.go(ui.byeReturn, now);
           return 'consumed';
         case 'parent':
           if (id === 'save') { call('onSave'); ui.go('intro', now); call('onParentClose'); }

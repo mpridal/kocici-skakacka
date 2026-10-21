@@ -201,7 +201,8 @@ function draw(now) {
   }
   drawWorld(ctx, world);
   const best = storage.getBest();
-  if (ui.screen === 'intro' || ui.screen === 'parent' || ui.screen === 'bye') {
+  const onIntro = ui.screen === 'intro' || ui.screen === 'parent' || (ui.screen === 'bye' && ui.byeReturn === 'intro');
+  if (onIntro) {
     drawIntro(ctx, ui, best, t);
   } else {
     for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);

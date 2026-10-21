@@ -180,3 +180,19 @@ test('Hraj! a Konec jsou stejně velké, v jedné řadě a jako dvojice uprostř
   assert.ok(Math.abs((play.x + exit.x + exit.w) / 2 - 640) < 1);
   assert.ok(exit.x - (play.x + play.w) >= 16 && exit.x - (play.x + play.w) <= 40, 'rozumná mezera');
 });
+
+test('v pauze je tlačítko Konec a po neúspěšném zavření se vrátí do pauzy', () => {
+  const calls = [];
+  const ui = createUI(createStorage(undefined), { onExit: () => calls.push('exit') });
+  ui.pointerDown(...center(btn('intro', 'play')), 0);
+  ui.pointerDown(...center(btn('playing', 'pause')), 1000);
+  assert.equal(ui.screen, 'paused');
+  const exit = btn('paused', 'exit');
+  assert.ok(exit, 'v pauze je Konec');
+  assert.equal(ui.pointerDown(...center(exit), 2000), 'consumed');
+  assert.deepEqual(calls, ['exit']);
+  ui.showBye(2400);
+  assert.equal(ui.screen, 'bye');
+  ui.pointerDown(...center(btn('bye', 'stay')), 3000);
+  assert.equal(ui.screen, 'paused', 'Hrát dál vrátí do rozehrané hry v pauze');
+});
