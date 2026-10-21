@@ -19,7 +19,8 @@ export const CONFIG = deepFreeze({
     jumpVelocity: 980,      // rychlost odrazu
     holdGravityFactor: 0.45, // při držení prstu klesá gravitace → vyšší skok
     maxHoldTime: 0.3,       // jak dlouho se dá skok „prodlužovat“
-    hitboxShrink: 0.25,     // o kolik je kolizní box menší než kresba
+    hitboxShrinkX: 0.4,     // o kolik je kolizní box užší než kresba (shovívavost)
+    hitboxShrinkY: 0.25,    // o kolik je kolizní box nižší než kresba
   },
 
   speed: {
@@ -43,10 +44,13 @@ export const CONFIG = deepFreeze({
     pairChance: 0.2,      // šance na dvojici avokád
     squirrelFromScore: 300,
     squirrelChance: 0.3,
+    avocadoScale: 1.3,    // velikost kresby avokáda
+    squirrelScale: 1.1,   // velikost kresby veverky
+    hitboxShrink: 0.25,
   },
 
-  // výška spodku veverky nad zemí
-  squirrelLanes: { low: 45, mid: 115, high: 175 },
+  // výška spodku veverky nad zemí: low = přeskočit, mid = vyšší skok, high = proběhnout pod ní
+  squirrelLanes: { low: 20, mid: 70, high: 110 },
 
   pickups: { fishChance: 0.5, heartChance: 0.04 },
 

@@ -1,5 +1,6 @@
 // Stav a fyzika kočky. y = výška nad zemí (0 = na zemi), vy > 0 = nahoru.
 import { CONFIG } from './config.js';
+import { shrinkBox } from './collision.js';
 
 // Obrys kresby kočky v jednotkách vzoru (bod (0,0) = zem pod kočkou).
 export const CAT_ART_BOX = { left: -47, right: 63, top: -66 };
@@ -54,15 +55,25 @@ export function updateCat(cat, dt, held, pressed) {
 }
 
 // Kolizní box kočky v logických souřadnicích obrazovky (zmenšený, shovívavý).
+const artBox = { x: 0, y: 0, w: 0, h: 0 };
 export function catHitbox(cat, out = { x: 0, y: 0, w: 0, h: 0 }) {
-  const { x, scale, hitboxShrink } = CONFIG.cat;
-  const w = (CAT_ART_BOX.right - CAT_ART_BOX.left) * scale;
-  const h = -CAT_ART_BOX.top * scale;
-  const sw = w * (1 - hitboxShrink);
-  const sh = h * (1 - hitboxShrink);
-  out.x = x + CAT_ART_BOX.left * scale + (w - sw) / 2;
-  out.y = CONFIG.groundY - cat.y - h + (h - sh) / 2;
-  out.w = sw;
-  out.h = sh;
-  return out;
+  const { x, scale, hitboxShrinkX, hitboxShrinkY } = CONFIG.cat;
+  artBox.w = (CAT_ART_BOX.right - CAT_ART_BOX.left) * scale;
+  artBox.h = -CAT_ART_BOX.top * scale;
+  artBox.x = x + CAT_ART_BOX.left * scale;
+  artBox.y = CONFIG.groundY - cat.y - artBox.h;
+  return shrinkBox(artBox, hitboxShrinkX, hitboxShrinkY, out);
+}
+
+// Doba ve vzduchu při skoku s držením `holdTime` (pro férový generátor).
+export function jumpAirtime(holdTime) {
+  const cat = createCat();
+  const dt = 1 / 240;
+  updateCat(cat, dt, true, true);
+  let t = dt;
+  while (!cat.onGround && t < 10) {
+    updateCat(cat, dt, t < holdTime, false);
+    t += dt;
+  }
+  return t;
 }
