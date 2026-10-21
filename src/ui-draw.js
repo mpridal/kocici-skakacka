@@ -2,7 +2,8 @@
 import { CONFIG, LOGICAL_W, LOGICAL_H } from './config.js';
 import { layoutButtons, greeting, recordText } from './ui.js';
 import { OUTLINE, prepare } from './art/shapes.js';
-import { drawCat } from './art/cat.js';
+import { drawCat, drawAccessoryIcon } from './art/cat.js';
+import { nextUnlock } from './accessories.js';
 import { drawHeart } from './art/heart.js';
 import { drawFish } from './art/fish.js';
 
@@ -221,6 +222,35 @@ function panel(ctx, x, y, w, h) {
   ctx.stroke();
 }
 
+// Tlačítko ozdoby: ukáže vybranou ozdobu a pod ním kolik rybiček zbývá do další.
+function drawAccButton(ctx, b, ui) {
+  roundRect(ctx, b.x, b.y + 6, b.w, b.h, 28);
+  ctx.fillStyle = 'rgba(74,63,69,0.25)';
+  ctx.fill();
+  roundRect(ctx, b.x, b.y + (ui.pressed === b.id ? 4 : 0), b.w, b.h, 28);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = OUTLINE;
+  ctx.stroke();
+  const cx = b.x + b.w / 2;
+  const cy = b.y + b.h / 2;
+  if (ui.settings.accessory === 'none') {
+    ctx.setLineDash([6, 6]);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#B4B2A9';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    drawAccessoryIcon(ctx, ui.settings.accessory, cx, cy, 70);
+  }
+  const next = nextUnlock(ui.settings.totalFish);
+  drawFish(ctx, b.x + 22, b.y + b.h + 30, 1.1, 0, 0);
+  text(ctx, next ? `${ui.settings.totalFish}/${next.need}` : String(ui.settings.totalFish), b.x + 54, b.y + b.h + 32, 26, { align: 'left' });
+}
+
 // ---------- obrazovky ----------
 // Posun středu obrazovky proti základní šířce 1280 (širší displeje).
 const centerShift = (ui) => (ui.viewW - LOGICAL_W) / 2;
@@ -232,7 +262,7 @@ export function drawIntro(ctx, ui, best, t) {
   const g = greeting(ui.settings.name);
   if (g) text(ctx, g, cx, 156, 48, { color: '#D4537E' });
   const blink = t % 3.4 < 0.16;
-  drawCat(ctx, cx - 22, 430, 3.2, ui.skin, blink ? 'blink' : 'idle', t);
+  drawCat(ctx, cx - 22, 430, 3.2, ui.skin, blink ? 'blink' : 'idle', t, false, ui.settings.accessory);
 
   for (const b of layoutButtons('intro', ui.viewW)) {
     if (b.id.startsWith('skin-')) {
@@ -251,6 +281,8 @@ export function drawIntro(ctx, ui, best, t) {
       ctx.moveTo(b.x + b.w / 2 - 10, b.y + 30); ctx.lineTo(b.x + b.w / 2 - 10, b.y + 42);
       ctx.moveTo(b.x + b.w / 2 + 10, b.y + 30); ctx.lineTo(b.x + b.w / 2 + 10, b.y + 42);
       ctx.stroke();
+    } else if (b.id === 'acc') {
+      drawAccButton(ctx, b, ui);
     } else if (b.id === 'gear') {
       ctx.globalAlpha = 0.55;
       iconGear(ctx, b.x + b.w / 2, b.y + b.h / 2, 52);
@@ -351,8 +383,13 @@ export function drawOver(ctx, ui, game, best, now) {
   text(ctx, String(game.score), 640, 260, 110, { outline: null, color: '#D4537E' });
   drawFish(ctx, 575, 360, 2.2, 0, 0);
   text(ctx, `× ${game.fish}`, 640, 362, 50, { align: 'left', outline: null });
+  if (ui.unlocked) {
+    text(ctx, `Nová ozdoba: ${ui.unlocked.label}!`, 640, ui.isRecord ? 500 : 450, 40, { color: '#B98AE0', outline: null });
+  }
   if (ui.isRecord) {
-    text(ctx, recordText(ui.settings.name), 640, 450, 54, { color: '#E08A3C', outline: null });
+    text(ctx, recordText(ui.settings.name), 640, ui.unlocked ? 445 : 450, ui.unlocked ? 46 : 54, { color: '#E08A3C', outline: null });
+  } else if (ui.unlocked) {
+    // místo rekordu ukážeme jen ozdobu
   } else {
     iconTrophy(ctx, 560, 448, 56);
     text(ctx, String(best), 600, 452, 46, { align: 'left', outline: null });

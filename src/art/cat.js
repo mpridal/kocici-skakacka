@@ -18,7 +18,55 @@ function legPath(x) {
 }
 const LEG_PATHS = LEGS.map(legPath);
 
-export function drawCat(ctx, x, groundY, scale, skin, pose, t, blinking = false) {
+// Ozdoba v souřadnicích kočky (sedí na hlavě / obličeji).
+export function drawAccessory(ctx, id) {
+  if (!id || id === 'none') return;
+  ctx.lineWidth = 1.8;
+  ctx.strokeStyle = OUTLINE;
+  if (id === 'bow') {
+    ctx.fillStyle = '#FF7590';
+    ctx.beginPath();
+    ctx.moveTo(48, -61); ctx.lineTo(41, -66); ctx.lineTo(41, -56); ctx.closePath();
+    ctx.moveTo(48, -61); ctx.lineTo(55, -66); ctx.lineTo(55, -56); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ellipse(ctx, 48, -61, 2.6, 2.6, '#FF9AB0', 1.6);
+  } else if (id === 'glasses') {
+    ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(40, -37, 5.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(52, -37.5, 5.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(45.2, -37.6); ctx.lineTo(46.8, -37.6); ctx.moveTo(34.8, -38); ctx.lineTo(29, -41); ctx.stroke();
+  } else if (id === 'flower') {
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      ellipse(ctx, 26 + Math.cos(a) * 3.6, -57 + Math.sin(a) * 3.6, 2.8, 2.8, '#FFB3C7', 1.2);
+    }
+    ellipse(ctx, 26, -57, 2.2, 2.2, '#FFD45E', 1.2);
+  } else if (id === 'crown') {
+    ctx.fillStyle = '#FFD45E';
+    ctx.beginPath();
+    ctx.moveTo(31, -56); ctx.lineTo(31, -65); ctx.lineTo(35.5, -61); ctx.lineTo(40, -69);
+    ctx.lineTo(44.5, -61); ctx.lineTo(49, -65); ctx.lineTo(49, -56); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ellipse(ctx, 40, -59, 1.6, 1.6, '#FF7590');
+  }
+}
+
+// Ikona ozdoby samostatně (tlačítko na úvodu); size = přibližná velikost v px.
+export function drawAccessoryIcon(ctx, id, cx, cy, size) {
+  // [střed x, střed y, šířka] ozdoby v souřadnicích kočky
+  const box = { bow: [48, -61, 15], glasses: [43, -38.5, 30], flower: [26, -57, 13], crown: [40, -62.5, 19] };
+  const c = box[id];
+  if (!c) return;
+  ctx.save();
+  prepare(ctx);
+  ctx.translate(cx, cy);
+  ctx.scale(size / c[2], size / c[2]);
+  ctx.translate(-c[0], -c[1]);
+  drawAccessory(ctx, id);
+  ctx.restore();
+}
+
+export function drawCat(ctx, x, groundY, scale, skin, pose, t, blinking = false, accessory = 'none') {
   ctx.save();
   prepare(ctx);
   ctx.translate(x, groundY);
@@ -64,6 +112,7 @@ export function drawCat(ctx, x, groundY, scale, skin, pose, t, blinking = false)
     }
     strokePath(ctx, MOUTH, skin.eye, 1.4);
   }
+  drawAccessory(ctx, accessory);
   ctx.restore();
 }
 

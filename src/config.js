@@ -68,6 +68,15 @@ export const CONFIG = deepFreeze({
 
   ui: { gameOverDelay: 1, parentHoldTime: 2, nameMaxLength: 12 },
 
+  // Ozdoby a kolik rybiček celkem je potřeba k odemčení
+  accessories: [
+    { id: 'none', label: 'Bez ozdoby', fish: 0 },
+    { id: 'bow', label: 'Mašle', fish: 30 },
+    { id: 'glasses', label: 'Brýle', fish: 80 },
+    { id: 'flower', label: 'Kytička', fish: 150 },
+    { id: 'crown', label: 'Korunka', fish: 250 },
+  ],
+
   skins: [
     { id: 'mourek', label: 'Mourek', fur: '#B9BAC2', stripe: '#6F717C', eye: '#3A3238' },
     { id: 'zrzka', label: 'Zrzka', fur: '#F6B26B', stripe: '#E08A3C', eye: '#3A3238' },

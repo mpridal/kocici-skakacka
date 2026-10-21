@@ -52,6 +52,9 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 | `pickups.fishChance` | jak často se objeví rybičky | 0.5 |
 | `pickups.heartChance` | jak často se objeví srdíčko | 0.04 |
 | `dayNight.cyclePoints` | po kolika bodech se střídá den a noc | 700 |
+| `obstacles.pairFromScore` | od kolika bodů chodí dvojice avokád | 150 |
+| `tutorial.untilScore` | nápověda „Ťukni / Podrž prst“, dokud dítě jednou nedosáhne tolika bodů | 150 |
+| `accessories` | ozdoby kočičky a kolik rybiček celkem je k nim potřeba | 30 / 80 / 150 / 250 |
 
 Po úpravě spusťte testy (`npm test`), které hlídají, že hra zůstane férová (vždy dost místa na skok).
 

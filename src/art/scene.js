@@ -49,10 +49,10 @@ export function drawPickup(ctx, p, t) {
   else drawHeart(ctx, p.x, y + Math.sin(t * 3) * 4, CONFIG.pickups.heartScale, '#FF8FA5');
 }
 
-export function drawGameCat(ctx, game, skin) {
+export function drawGameCat(ctx, game, skin, accessory = 'none') {
   const c = CONFIG.cat;
   groundShadow(ctx, c.x + 8 * c.scale, game.cat.y, 95 * c.scale);
   if (game.invuln > 0 && Math.floor(game.invuln * 8) % 2 === 1) return; // blikání
   const pose = game.invuln > CONFIG.lives.invulnTime - 0.6 ? 'hurt' : game.cat.onGround ? 'run' : 'jump';
-  drawCat(ctx, c.x, CONFIG.groundY - game.cat.y, c.scale, skin, pose, game.cat.animTime);
+  drawCat(ctx, c.x, CONFIG.groundY - game.cat.y, c.scale, skin, pose, game.cat.animTime, false, accessory);
 }

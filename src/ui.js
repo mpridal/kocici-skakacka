@@ -3,6 +3,7 @@
 // Rozvržení je navržené pro šířku 1280; na širším displeji se střed posune
 // na střed a tlačítka označená a: 'r' zůstanou u pravého okraje.
 import { CONFIG, LOGICAL_W } from './config.js';
+import { unlockedAccessories } from './accessories.js';
 
 export const SCREENS = ['intro', 'playing', 'paused', 'over', 'parent', 'bye'];
 const JUMP_GUARD_MS = 250; // po startu/pokračování chvíli neskákat
@@ -12,6 +13,7 @@ const skinButtons = CONFIG.skins.map((s, i) => ({ id: `skin-${i}`, x: 382 + i * 
 
 const LAYOUT = {
   intro: [
+    { id: 'acc', x: 150, y: 280, w: 110, h: 110 },
     { id: 'prev', x: 300, y: 280, w: 110, h: 110 },
     { id: 'next', x: 870, y: 280, w: 110, h: 110 },
     ...skinButtons,
@@ -70,6 +72,7 @@ export function createUI(storage, cb = {}) {
     viewW: LOGICAL_W,  // logická šířka displeje (nastavuje main.js)
     overAt: 0,
     isRecord: false,
+    unlocked: null,    // ozdoba odemčená v poslední hře
     pressed: null,     // id právě stisknutého tlačítka (pro vizuální odezvu)
     holdStart: -1,     // začátek držení ozubeného kolečka
     jumpGuardUntil: 0,
@@ -93,6 +96,12 @@ export function createUI(storage, cb = {}) {
     toggleMute() {
       ui.setMuted(!ui.settings.muted);
       call('onMute', ui.settings.muted);
+    },
+    nextAccessory() {
+      const list = unlockedAccessories(ui.settings.totalFish);
+      const i = list.findIndex((a) => a.id === ui.settings.accessory);
+      storage.saveSettings({ accessory: list[(i + 1) % list.length].id });
+      ui.settings = storage.getSettings();
     },
     setName(name) {
       storage.saveSettings({ name });
@@ -118,9 +127,10 @@ export function createUI(storage, cb = {}) {
       call('onPause');
     },
 
-    gameOver(now, isRecord) {
+    gameOver(now, isRecord, unlocked = null) {
       ui.overAt = now;
       ui.isRecord = isRecord;
+      ui.unlocked = unlocked;
       ui.go('over', now);
     },
 
@@ -140,6 +150,7 @@ export function createUI(storage, cb = {}) {
         case 'intro':
           if (id === 'play') { ui.go('playing', now); call('onStart'); }
           else if (id === 'exit') call('onExit');
+          else if (id === 'acc') ui.nextAccessory();
           else if (id === 'prev') ui.setSkin(ui.skinIndex - 1);
           else if (id === 'next') ui.setSkin(ui.skinIndex + 1);
           else if (id && id.startsWith('skin-')) ui.setSkin(Number(id.slice(5)));

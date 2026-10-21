@@ -8,6 +8,7 @@ const PRECACHE = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/icon-maskable-512.png',
+  'src/accessories.js',
   'src/art/avocado.js',
   'src/art/cat.js',
   'src/art/effects.js',

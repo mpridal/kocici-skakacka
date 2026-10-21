@@ -4,6 +4,7 @@ import { CONFIG } from './config.js';
 
 const KEY = 'kocka.v1';
 const SKIN_IDS = CONFIG.skins.map((s) => s.id);
+const ACCESSORY_IDS = CONFIG.accessories.map((a) => a.id);
 
 function cleanName(v) {
   return typeof v === 'string' ? v.trim().slice(0, CONFIG.ui.nameMaxLength) : '';
@@ -17,6 +18,8 @@ function sanitize(raw) {
     muted: r.muted === true,
     name: cleanName(r.name),
     tutorialDone: r.tutorialDone === true,
+    totalFish: Number.isFinite(r.totalFish) && r.totalFish > 0 ? Math.floor(r.totalFish) : 0,
+    accessory: ACCESSORY_IDS.includes(r.accessory) ? r.accessory : 'none',
   };
 }
 
@@ -43,7 +46,10 @@ export function createStorage(...args) {
         persist();
       }
     },
-    getSettings: () => ({ skin: state.skin, muted: state.muted, name: state.name, tutorialDone: state.tutorialDone }),
+    getSettings: () => ({
+      skin: state.skin, muted: state.muted, name: state.name, tutorialDone: state.tutorialDone,
+      totalFish: state.totalFish, accessory: state.accessory,
+    }),
     saveSettings(partial) {
       state = sanitize({ ...state, ...partial, name: cleanName(partial.name ?? state.name) });
       persist();

@@ -11,7 +11,7 @@ function memoryBackend(initial = {}) {
   };
 }
 
-const DEFAULTS = { skin: 'mourek', muted: false, name: '', tutorialDone: false };
+const DEFAULTS = { skin: 'mourek', muted: false, name: '', tutorialDone: false, totalFish: 0, accessory: 'none' };
 
 test('prázdné úložiště vrací výchozí hodnoty', () => {
   const s = createStorage(memoryBackend());

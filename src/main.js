@@ -11,6 +11,7 @@ import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawL
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
 import { hintFor } from './tutorial.js';
+import { newlyUnlocked } from './accessories.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -217,7 +218,7 @@ function draw(now) {
   } else {
     for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);
     for (const p of game.pickups) if (p.active) drawPickup(ctx, p, game.time);
-    drawGameCat(ctx, game, ui.skin);
+    drawGameCat(ctx, game, ui.skin, ui.settings.accessory);
     if (debugBoxes) drawDebugBoxes();
     if (ui.screen === 'playing') {
       drawHud(ctx, game, ui);
@@ -255,11 +256,16 @@ function handleEvents(now) {
       audio.stopMusic();
       const record = game.score > storage.getBest();
       storage.setBest(game.score);
+      const before = ui.settings.totalFish;
+      storage.saveSettings({ totalFish: before + game.fish });
+      ui.settings = storage.getSettings();
+      const unlocked = newlyUnlocked(before, ui.settings.totalFish);
       if (game.score >= CONFIG.tutorial.untilScore && !ui.settings.tutorialDone) {
         storage.saveSettings({ tutorialDone: true });
         ui.settings = storage.getSettings();
       }
-      ui.gameOver(now, record);
+      ui.gameOver(now, record, unlocked);
+      if (unlocked) audio.play('heart');
       if (record) {
         spawnConfetti(effects, vp.logicalW);
         audio.play('record');
