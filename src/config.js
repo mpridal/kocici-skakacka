@@ -16,7 +16,7 @@ export const CONFIG = deepFreeze({
     x: 300,                 // pozice kočky zleva (levá třetina)
     scale: 1.5,             // velikost kresby kočky
     gravity: 3000,
-    jumpVelocity: 1000,     // rychlost odrazu
+    jumpVelocity: 980,      // rychlost odrazu
     holdGravityFactor: 0.45, // při držení prstu klesá gravitace → vyšší skok
     maxHoldTime: 0.3,       // jak dlouho se dá skok „prodlužovat“
     hitboxShrink: 0.25,     // o kolik je kolizní box menší než kresba
