@@ -24,6 +24,7 @@ const PRECACHE = [
   'src/config.js',
   'src/daynight.js',
   'src/game.js',
+  'src/haptics.js',
   'src/input.js',
   'src/main.js',
   'src/obstacles.js',

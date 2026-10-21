@@ -13,6 +13,7 @@ import { createAudio, tempoForSpeed } from './audio.js';
 import { hintFor } from './tutorial.js';
 import { newlyUnlocked } from './accessories.js';
 import { startAutoUpdate } from './update.js';
+import { vibrateFor } from './haptics.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -248,6 +249,7 @@ function handleEvents(now) {
   for (const e of game.events) {
     if (e === 'levelUp') { levelUpAt = now; audio.play('levelUp'); }
     if (e === 'jump' || e === 'fish' || e === 'hit') audio.play(e);
+    if (e === 'hit' || e === 'over') vibrateFor(e);
     if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
     if (e === 'heart' || e === 'heartBonus') {
       audio.play('heart');
