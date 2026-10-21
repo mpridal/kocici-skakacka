@@ -56,3 +56,8 @@ test('manifest: název, fullscreen, na šířku, ikony', () => {
   assert.ok(m.icons.some((i) => (i.purpose || '').includes('maskable')));
   for (const i of m.icons) assert.ok(existsSync(join(root, i.src)), `chybí ${i.src}`);
 });
+
+test('aktualizace stahuje soubory ze sítě, ne ze staré HTTP cache', () => {
+  const sw = readFileSync(join(root, 'sw.js'), 'utf8');
+  assert.match(sw, /new Request\([^)]*\{\s*cache:\s*'reload'\s*\}\)/);
+});

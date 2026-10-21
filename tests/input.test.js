@@ -19,11 +19,16 @@ test('dva prsty, jeden zvednut → pořád drženo', () => {
   assert.equal(s.held, false);
 });
 
-test('druhý prst během držení nevytvoří nový stisk', () => {
+test('položený palec neblokuje další ťuknutí druhou rukou', () => {
+  // Dvojskoku brání fyzika (ve vzduchu se stisk ignoruje), vstup stisk propustí.
   const s = createPointerState();
   reducePointer(s, 'down', 1, true);
   reducePointer(s, 'down', 2, true);
-  assert.equal(s.pressCount, 1);
+  assert.equal(s.pressCount, 2);
+  reducePointer(s, 'up', 2);
+  reducePointer(s, 'down', 3, true);
+  assert.equal(s.pressCount, 3);
+  assert.equal(s.held, true);
 });
 
 test('opakovaný keydown (autorepeat) stejné klávesy nevytvoří nový stisk', () => {

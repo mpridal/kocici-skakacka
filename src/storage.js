@@ -19,7 +19,10 @@ function sanitize(raw) {
   };
 }
 
-export function createStorage(backend = globalThis.localStorage) {
+// Bez argumentu použije localStorage; i samotný přístup k němu může vyhodit (zablokovaná data).
+export function createStorage(...args) {
+  let backend = null;
+  try { backend = args.length ? args[0] : globalThis.localStorage; } catch { backend = null; }
   let state;
   try {
     state = sanitize(JSON.parse(backend?.getItem(KEY) ?? 'null'));

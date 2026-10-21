@@ -10,7 +10,9 @@ export function reducePointer(s, type, id, allowJump = false) {
   const i = s.ids.indexOf(id);
   if (type === 'down') {
     if (i !== -1 || !allowJump) return s;
-    if (s.ids.length === 0) s.pressCount++;
+    // Každý nový prst je stisk (položený palec neblokuje další ťuknutí);
+    // dvojskoku brání fyzika kočky, která stisk ve vzduchu ignoruje.
+    s.pressCount++;
     s.ids.push(id);
   } else if (i !== -1) {
     s.ids.splice(i, 1);

@@ -63,3 +63,17 @@ test('bez backendu funguje jen v paměti', () => {
   s.setBest(7);
   assert.equal(s.getBest(), 7);
 });
+
+test('zablokované localStorage (výjimka už při přístupu) hru neshodí', () => {
+  const desc = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('SecurityError'); } });
+  try {
+    const s = createStorage();
+    assert.equal(s.getBest(), 0);
+    s.setBest(5);
+    assert.equal(s.getBest(), 5);
+  } finally {
+    if (desc) Object.defineProperty(globalThis, 'localStorage', desc);
+    else delete globalThis.localStorage;
+  }
+});

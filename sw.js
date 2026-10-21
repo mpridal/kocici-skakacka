@@ -34,7 +34,9 @@ const PRECACHE = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_VERSION).then((cache) => cache.addAll(PRECACHE)));
+  // cache: 'reload' = vždy čerstvé soubory ze sítě, ne starší kopie z HTTP cache prohlížeče
+  event.waitUntil(caches.open(CACHE_VERSION).then((cache) =>
+    cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'reload' })))));
 });
 
 self.addEventListener('activate', (event) => {
