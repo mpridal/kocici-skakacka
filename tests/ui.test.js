@@ -135,3 +135,18 @@ test('ťuk na Hraj! funguje i na širokém displeji', () => {
   assert.equal(ui.pointerDown(...center(play), 0), 'consumed');
   assert.equal(ui.screen, 'playing');
 });
+
+test('ve hře jde vypnout a zapnout zvuk a ťuk na tlačítko neskáče', () => {
+  const storage = createStorage(undefined);
+  const muted = [];
+  const ui = createUI(storage, { onMute: (m) => muted.push(m) });
+  ui.pointerDown(...center(btn('intro', 'play')), 0);
+  const sound = btn('playing', 'sound');
+  assert.ok(sound, 've hře je tlačítko zvuku');
+  assert.equal(ui.pointerDown(...center(sound), 1000), 'consumed');
+  assert.equal(ui.screen, 'playing');
+  assert.equal(storage.getSettings().muted, true);
+  assert.equal(ui.pointerDown(...center(sound), 2000), 'consumed');
+  assert.equal(storage.getSettings().muted, false);
+  assert.deepEqual(muted, [true, false]);
+});

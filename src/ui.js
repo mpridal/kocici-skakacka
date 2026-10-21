@@ -19,7 +19,10 @@ const LAYOUT = {
     { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
     { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],
-  playing: [{ id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' }],
+  playing: [
+    { id: 'sound', x: 1048, y: 16, w: 100, h: 100, a: 'r' },
+    { id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' },
+  ],
   paused: [
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
     { id: 'home', x: 490, y: 470, w: 300, h: 104 },
@@ -82,6 +85,10 @@ export function createUI(storage, cb = {}) {
       storage.saveSettings({ muted: m });
       ui.settings = storage.getSettings();
     },
+    toggleMute() {
+      ui.setMuted(!ui.settings.muted);
+      call('onMute', ui.settings.muted);
+    },
     setName(name) {
       storage.saveSettings({ name });
       ui.settings = storage.getSettings();
@@ -117,13 +124,14 @@ export function createUI(storage, cb = {}) {
       switch (ui.screen) {
         case 'playing':
           if (id === 'pause') { ui.pause(now); return 'consumed'; }
+          if (id === 'sound') { ui.toggleMute(); return 'consumed'; }
           return now < ui.jumpGuardUntil ? 'consumed' : 'jump';
         case 'intro':
           if (id === 'play') { ui.go('playing', now); call('onStart'); }
           else if (id === 'prev') ui.setSkin(ui.skinIndex - 1);
           else if (id === 'next') ui.setSkin(ui.skinIndex + 1);
           else if (id && id.startsWith('skin-')) ui.setSkin(Number(id.slice(5)));
-          else if (id === 'sound') { ui.setMuted(!ui.settings.muted); call('onMute', ui.settings.muted); }
+          else if (id === 'sound') ui.toggleMute();
           else if (id === 'gear') ui.holdStart = now;
           return 'consumed';
         case 'paused':

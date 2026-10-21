@@ -275,9 +275,9 @@ export function drawHud(ctx, game, ui) {
   }
   drawFish(ctx, 52, 122, 1.6, 0, 0);
   text(ctx, String(game.fish), 100, 124, 44, { align: 'left' });
-  const pause = layoutButtons('playing', ui.viewW)[0];
-  text(ctx, String(game.score), pause.x - 24, 66, 64, { align: 'right' });
-  button(ctx, pause, ui);
+  const buttons = layoutButtons('playing', ui.viewW);
+  text(ctx, String(game.score), buttons[0].x - 24, 66, 64, { align: 'right' });
+  for (const b of buttons) button(ctx, b, ui);
 }
 
 export function drawPaused(ctx, ui) {
