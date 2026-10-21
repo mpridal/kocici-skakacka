@@ -7,7 +7,7 @@ import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
 import { createUI, layoutButtons } from './ui.js';
-import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, NAME_BOX, DIM } from './ui-draw.js';
+import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio } from './audio.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
@@ -31,6 +31,7 @@ const audio = createAudio();
 
 const startRun = () => {
   resetGame(game);
+  levelUpAt = -1e9;
   clearEffects(effects);
   audio.startMusic();
 };
@@ -53,7 +54,7 @@ audio.setMuted(ui.settings.muted);
 function placeNameInput() {
   const s = vp.scale;
   Object.assign(nameInput.style, {
-    left: `${vp.offsetX + NAME_BOX.x * s}px`,
+    left: `${vp.offsetX + (NAME_BOX.x + (vp.logicalW - LOGICAL_W) / 2) * s}px`,
     top: `${vp.offsetY + NAME_BOX.y * s}px`,
     width: `${NAME_BOX.w * s}px`,
     height: `${NAME_BOX.h * s}px`,
@@ -100,7 +101,7 @@ function keyboardAction(now) {
   if (ui.screen === 'playing') return ui.pointerDown(-100, -100, now) === 'jump';
   const id = KEY_BUTTON[ui.screen];
   if (id) {
-    const b = layoutButtons(ui.screen).find((x) => x.id === id);
+    const b = layoutButtons(ui.screen, ui.viewW).find((x) => x.id === id);
     ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, now);
     ui.pointerUp();
   }
@@ -136,6 +137,9 @@ document.addEventListener('fullscreenchange', lockLandscape);
 
 function resize() {
   vp = computeViewport(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+  game.viewW = vp.logicalW;
+  world.w = vp.logicalW;
+  ui.setViewWidth(vp.logicalW);
   lockLandscape();
   canvas.width = vp.canvasW;
   canvas.height = vp.canvasH;
@@ -172,7 +176,7 @@ function draw(now) {
   ctx.setTransform(s, 0, 0, s, vp.offsetX * vp.dpr, vp.offsetY * vp.dpr);
   ctx.save();
   ctx.beginPath();
-  ctx.rect(0, 0, LOGICAL_W, LOGICAL_H);
+  ctx.rect(0, 0, vp.logicalW, LOGICAL_H);
   ctx.clip();
 
   if (vp.portrait) {
@@ -192,7 +196,10 @@ function draw(now) {
     for (const p of game.pickups) if (p.active) drawPickup(ctx, p, game.time);
     drawGameCat(ctx, game, ui.skin);
     if (debugBoxes) drawDebugBoxes();
-    if (ui.screen === 'playing') drawHud(ctx, game, ui);
+    if (ui.screen === 'playing') {
+      drawHud(ctx, game, ui);
+      drawLevelUp(ctx, (now - levelUpAt) / 1000, vp.logicalW / 2);
+    }
   }
   ctx.restore();
 
@@ -209,8 +216,10 @@ function draw(now) {
 }
 
 // ---------- smyčka ----------
+let levelUpAt = -1e9;
 function handleEvents(now) {
   for (const e of game.events) {
+    if (e === 'levelUp') { levelUpAt = now; audio.play('levelUp'); }
     if (e === 'jump' || e === 'fish' || e === 'hit') audio.play(e);
     if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
     if (e === 'heart' || e === 'heartBonus') {
@@ -223,7 +232,7 @@ function handleEvents(now) {
       storage.setBest(game.score);
       ui.gameOver(now, record);
       if (record) {
-        spawnConfetti(effects, LOGICAL_W);
+        spawnConfetti(effects, vp.logicalW);
         audio.play('record');
       }
     }

@@ -10,7 +10,7 @@ export const PAIR_SMALL = 0.7; // menší avokádo ve dvojici
 export const PAIR_GAP = 6;     // mezera mezi avokády ve dvojici (jednotky vzoru)
 const SMALL = 0.72;
 
-const SPAWN_X = LOGICAL_W + 40;
+const SPAWN_X = LOGICAL_W + 40; // výchozí místo vzniku (za pravým okrajem plochy 1280)
 const DESPAWN_X = -200;
 
 function blankObstacle() {
@@ -97,7 +97,8 @@ export function createSpawner(rng = Math.random, onGap = null) {
   return {
     get minGapTime() { return minGapTime; },
     reset() { distance = 0; nextAt = 0; },
-    update(pool, dt, speed, score) {
+    // spawnX = kde překážka vzniká; na širším displeji dál vpravo
+    update(pool, dt, speed, score, spawnX = SPAWN_X) {
       const dx = speed * dt;
       distance += dx;
       for (const ob of pool) {
@@ -113,7 +114,7 @@ export function createSpawner(rng = Math.random, onGap = null) {
       const kind = pickKind(score);
       makeObstacle(kind, kind === 'squirrel' ? LANES[Math.floor(rng() * 3)] : null, slot);
       slot.active = true;
-      slot.x = SPAWN_X;
+      slot.x = spawnX;
       slot.spawnDistance = distance;
       slot.animTime = 0;
       slot.blinkTimer = randomBlink(rng);
@@ -121,7 +122,7 @@ export function createSpawner(rng = Math.random, onGap = null) {
       const extra = o.extraGapMin + rng() * (o.extraGapMax - o.extraGapMin);
       const gapPx = (minGapTime + extra) * speed;
       nextAt = distance + slot.w + gapPx;
-      if (onGap) onGap(SPAWN_X + slot.w, gapPx);
+      if (onGap) onGap(spawnX + slot.w, gapPx);
     },
   };
 }

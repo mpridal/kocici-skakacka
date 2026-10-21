@@ -1,6 +1,8 @@
 // Logika obrazovek a tlačítek (bez kreslení – to je v ui-draw.js).
-// Souřadnice jsou logické (1280×720), čas `now` v milisekundách.
-import { CONFIG } from './config.js';
+// Souřadnice jsou logické (šířka podle displeje, výška 720), čas `now` v milisekundách.
+// Rozvržení je navržené pro šířku 1280; na širším displeji se střed posune
+// na střed a tlačítka označená a: 'r' zůstanou u pravého okraje.
+import { CONFIG, LOGICAL_W } from './config.js';
 
 export const SCREENS = ['intro', 'playing', 'paused', 'over', 'parent'];
 const JUMP_GUARD_MS = 250; // po startu/pokračování chvíli neskákat
@@ -14,10 +16,10 @@ const LAYOUT = {
     { id: 'next', x: 870, y: 280, w: 110, h: 110 },
     ...skinButtons,
     { id: 'play', x: 490, y: 592, w: 300, h: 108 },
-    { id: 'sound', x: 1160, y: 24, w: 96, h: 96 },
-    { id: 'gear', x: 1160, y: 600, w: 96, h: 96 },
+    { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
+    { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],
-  playing: [{ id: 'pause', x: 1164, y: 16, w: 100, h: 100 }],
+  playing: [{ id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' }],
   paused: [
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
     { id: 'home', x: 490, y: 470, w: 300, h: 104 },
@@ -32,15 +34,23 @@ const LAYOUT = {
   ],
 };
 
-export function layoutButtons(screen) {
-  return LAYOUT[screen] || [];
+const layoutCache = new Map();
+export function layoutButtons(screen, w = LOGICAL_W) {
+  const key = `${screen}@${w}`;
+  let list = layoutCache.get(key);
+  if (!list) {
+    const dx = (w - LOGICAL_W) / 2;
+    list = (LAYOUT[screen] || []).map((b) => ({ ...b, x: b.x + (b.a === 'r' ? 2 * dx : dx) }));
+    layoutCache.set(key, list);
+  }
+  return list;
 }
 
 export const greeting = (name) => (name ? `Ahoj, ${name}!` : '');
 export const recordText = (name) => (name ? `Nový rekord, ${name}!` : 'Nový rekord!');
 
-function hit(screen, x, y) {
-  for (const b of LAYOUT[screen]) {
+function hit(screen, w, x, y) {
+  for (const b of layoutButtons(screen, w)) {
     if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return b.id;
   }
   return null;
@@ -50,6 +60,7 @@ export function createUI(storage, cb = {}) {
   const call = (name, ...a) => cb[name] && cb[name](...a);
   const ui = {
     screen: 'intro',
+    viewW: LOGICAL_W,  // logická šířka displeje (nastavuje main.js)
     overAt: 0,
     isRecord: false,
     pressed: null,     // id právě stisknutého tlačítka (pro vizuální odezvu)
@@ -76,6 +87,8 @@ export function createUI(storage, cb = {}) {
       ui.settings = storage.getSettings();
     },
 
+    setViewWidth(w) { ui.viewW = w; },
+
     go(screen, now) {
       ui.screen = screen;
       if (screen === 'playing') ui.jumpGuardUntil = now + JUMP_GUARD_MS;
@@ -99,7 +112,7 @@ export function createUI(storage, cb = {}) {
 
     // Vrací 'jump', pokud má ťuk skočit, jinak 'consumed'.
     pointerDown(x, y, now) {
-      const id = hit(ui.screen, x, y);
+      const id = hit(ui.screen, ui.viewW, x, y);
       ui.pressed = id;
       switch (ui.screen) {
         case 'playing':

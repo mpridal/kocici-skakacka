@@ -37,14 +37,52 @@ test('skóre = vzdálenost + rybičky', () => {
   assert.equal(g.score, Math.floor(g.distance * CONFIG.score.pointsPerPx) + 3 * CONFIG.score.fish);
 });
 
-test('rychlost roste se skóre a nepřekročí strop', () => {
+// Nastaví skóre přes vzdálenost (bez rybiček) a nechá hru běžet bez překážek.
+function runAtScore(g, score, seconds) {
+  g.distance = score / CONFIG.score.pointsPerPx;
+  for (let i = 0; i < seconds * 60; i++) { clearObstacles(g); g.invuln = 1; stepGame(g, dt, false, false); }
+}
+
+test('v rámci úrovně je rychlost stálá', () => {
   const g = createGame(noSpawn);
+  runAtScore(g, 10, 1);
+  assert.equal(g.speed, CONFIG.speed.start);
+  assert.equal(g.level, 0);
+});
+
+test('po každých levelEvery bodech hra zrychlí o krok a ohlásí to jednou', () => {
+  const sp = CONFIG.speed;
+  const g = createGame(noSpawn);
+  runAtScore(g, 10, 0.2);
+  g.distance = (sp.levelEvery + 1) / CONFIG.score.pointsPerPx;
+  clearObstacles(g);
   stepGame(g, dt, false, false);
-  const s0 = g.speed;
-  g.distance = 1e7;
-  stepGame(g, dt, false, false);
-  assert.ok(g.speed > s0);
+  assert.ok(g.events.includes('levelUp'));
+  assert.equal(g.level, 1);
+  const right = g.speed;
+  assert.ok(right < sp.start + sp.levelStep, 'zrychlení je plynulé, ne skokové');
+  let ups = 0;
+  for (let i = 0; i < 60 * (sp.rampTime + 0.5); i++) {
+    clearObstacles(g);
+    stepGame(g, dt, false, false);
+    if (g.events.includes('levelUp')) ups++;
+  }
+  assert.equal(ups, 0);
+  assert.equal(g.speed, sp.start + sp.levelStep);
+});
+
+test('rychlost nepřekročí strop a nad ním už nehlásí další úrovně', () => {
+  const g = createGame(noSpawn);
+  runAtScore(g, 1e6, 10); // rozjezd o všechny úrovně najednou trvá déle
   assert.equal(g.speed, CONFIG.speed.max);
+  let ups = 0;
+  for (let k = 1; k < 5; k++) {
+    g.distance = (1e6 + k * CONFIG.speed.levelEvery) / CONFIG.score.pointsPerPx;
+    clearObstacles(g);
+    stepGame(g, dt, false, false);
+    if (g.events.includes('levelUp')) ups++;
+  }
+  assert.equal(ups, 0);
 });
 
 test('zásah ubere život a dá dočasnou nezranitelnost', () => {

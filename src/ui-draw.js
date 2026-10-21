@@ -203,15 +203,19 @@ function panel(ctx, x, y, w, h) {
 }
 
 // ---------- obrazovky ----------
+// Posun středu obrazovky proti základní šířce 1280 (širší displeje).
+const centerShift = (ui) => (ui.viewW - LOGICAL_W) / 2;
+
 export function drawIntro(ctx, ui, best, t) {
   prepare(ctx);
-  text(ctx, 'Kočičí skákačka', 640, 78, 76);
+  const cx = 640 + centerShift(ui);
+  text(ctx, 'Kočičí skákačka', cx, 78, 76);
   const g = greeting(ui.settings.name);
-  if (g) text(ctx, g, 640, 156, 48, { color: '#D4537E' });
+  if (g) text(ctx, g, cx, 156, 48, { color: '#D4537E' });
   const blink = t % 3.4 < 0.16;
-  drawCat(ctx, 618, 430, 3.2, ui.skin, blink ? 'blink' : 'idle', t);
+  drawCat(ctx, cx - 22, 430, 3.2, ui.skin, blink ? 'blink' : 'idle', t);
 
-  for (const b of layoutButtons('intro')) {
+  for (const b of layoutButtons('intro', ui.viewW)) {
     if (b.id.startsWith('skin-')) {
       const skin = CONFIG.skins[Number(b.id.slice(5))];
       const sel = skin.id === ui.skin.id;
@@ -245,10 +249,22 @@ export function drawIntro(ctx, ui, best, t) {
       button(ctx, b, ui);
     }
   }
-  text(ctx, CONFIG.skins[ui.skinIndex].label, 640, 590 - 14, 30, { color: '#6F717C' });
+  text(ctx, CONFIG.skins[ui.skinIndex].label, cx, 590 - 14, 30, { color: '#6F717C' });
 
   iconTrophy(ctx, 70, 66, 70);
   text(ctx, String(best), 118, 70, 48, { align: 'left' });
+}
+
+// Nápis „Rychleji!“ po zrychlení: krátce vyskočí a zmizí. age = sekundy od zrychlení.
+export function drawLevelUp(ctx, age, cx) {
+  if (age < 0 || age > 1.6) return;
+  const pop = age < 0.25 ? 0.6 + (age / 0.25) * 0.5 : age < 0.4 ? 1.1 - ((age - 0.25) / 0.15) * 0.1 : 1;
+  ctx.save();
+  ctx.globalAlpha = age > 1.2 ? 1 - (age - 1.2) / 0.4 : 1;
+  ctx.translate(cx, 250);
+  ctx.scale(pop, pop);
+  text(ctx, 'Rychleji!', 0, 0, 84, { color: '#FF7590' });
+  ctx.restore();
 }
 
 export function drawHud(ctx, game, ui) {
@@ -259,17 +275,23 @@ export function drawHud(ctx, game, ui) {
   }
   drawFish(ctx, 52, 122, 1.6, 0, 0);
   text(ctx, String(game.fish), 100, 124, 44, { align: 'left' });
-  text(ctx, String(game.score), 1140, 66, 64, { align: 'right' });
-  button(ctx, layoutButtons('playing')[0], ui);
+  const pause = layoutButtons('playing', ui.viewW)[0];
+  text(ctx, String(game.score), pause.x - 24, 66, 64, { align: 'right' });
+  button(ctx, pause, ui);
 }
 
 export function drawPaused(ctx, ui) {
+  ctx.save();
+  ctx.translate(centerShift(ui), 0);
   panel(ctx, 340, 150, 600, 460);
   text(ctx, 'Pauza', 640, 240, 80, { outline: null });
   for (const b of layoutButtons('paused')) button(ctx, b, ui);
+  ctx.restore();
 }
 
 export function drawOver(ctx, ui, game, best, now) {
+  ctx.save();
+  ctx.translate(centerShift(ui), 0);
   panel(ctx, 260, 70, 760, 610);
   text(ctx, 'Konec hry!', 640, 150, 76, { outline: null });
   text(ctx, String(game.score), 640, 260, 110, { outline: null, color: '#D4537E' });
@@ -283,9 +305,12 @@ export function drawOver(ctx, ui, game, best, now) {
   }
   const active = ui.overButtonsActive(now);
   for (const b of layoutButtons('over')) button(ctx, b, ui, active);
+  ctx.restore();
 }
 
 export function drawParent(ctx, ui) {
+  ctx.save();
+  ctx.translate(centerShift(ui), 0);
   panel(ctx, 300, 120, 680, 480);
   text(ctx, 'Pro rodiče', 640, 190, 54, { outline: null });
   text(ctx, 'Jméno dítěte (zobrazí se jen na tomto tabletu):', 640, 262, 26, { outline: null, weight: 600, color: '#6F717C' });
@@ -296,6 +321,7 @@ export function drawParent(ctx, ui) {
   ctx.strokeStyle = OUTLINE;
   ctx.stroke();
   for (const b of layoutButtons('parent')) button(ctx, b, ui);
+  ctx.restore();
 }
 
 export const NAME_BOX = { x: 400, y: 308, w: 480, h: 84 };

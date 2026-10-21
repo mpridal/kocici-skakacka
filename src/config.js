@@ -26,7 +26,9 @@ export const CONFIG = deepFreeze({
   speed: {
     start: 330,          // počáteční rychlost běhu (px/s)
     max: 560,            // strop rychlosti
-    gainPerPoint: 0.1,   // o kolik px/s zrychlí za každý bod (strop zhruba po 4 minutách)
+    levelEvery: 200,     // po kolika bodech přijde další úroveň (nápis „Rychleji!“)
+    levelStep: 30,       // o kolik px/s každá úroveň zrychlí
+    rampTime: 1,         // za kolik sekund se plynule rozjede na novou rychlost
   },
 
   score: {

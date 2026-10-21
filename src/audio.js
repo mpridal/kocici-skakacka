@@ -69,6 +69,7 @@ export function createAudio() {
       [523, 659, 784].forEach((f, i) => tone(f, t + i * 0.14, 0.16, { type: 'square', vol: 0.12 }));
       tone(1046, t + 0.42, 0.5, { type: 'square', vol: 0.12 });
     },
+    levelUp: (t) => [523, 784, 1046].forEach((f, i) => tone(f, t + i * 0.08, 0.14, { type: 'triangle', vol: 0.2 })),
     click: (t) => tone(700, t, 0.05, { type: 'triangle', vol: 0.15 }),
   };
 

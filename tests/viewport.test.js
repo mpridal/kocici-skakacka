@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeViewport, toLogical } from '../src/viewport.js';
+import { computeViewport, toLogical, MAX_LOGICAL_W } from '../src/viewport.js';
 
 test('přesný poměr 16:9 bez letterboxu', () => {
   const vp = computeViewport(1280, 720, 1);
@@ -31,4 +31,23 @@ test('střed obrazovky odpovídá středu logické plochy', () => {
     assert.ok(Math.abs(p.x - 640) < 1e-9);
     assert.ok(Math.abs(p.y - 360) < 1e-9);
   }
+});
+
+test('telefon 20:9 využije celou šířku (širší logická plocha, bez rámečku)', () => {
+  const vp = computeViewport(2400, 1080, 1);
+  assert.equal(vp.logicalW, 1600);
+  assert.ok(Math.abs(vp.scale - 1.5) < 1e-9);
+  assert.equal(vp.offsetX, 0);
+  assert.equal(vp.offsetY, 0);
+});
+
+test('poměr 16:9 a užší zůstává 1280 široký', () => {
+  assert.equal(computeViewport(1280, 720, 1).logicalW, 1280);
+  assert.equal(computeViewport(2000, 1200, 1).logicalW, 1280);
+});
+
+test('extrémně široký displej má strop šířky a zbytek vycentruje', () => {
+  const vp = computeViewport(3000, 1000, 1);
+  assert.equal(vp.logicalW, MAX_LOGICAL_W);
+  assert.ok(vp.offsetX > 0);
 });

@@ -1,5 +1,5 @@
 // Stav jedné hry: skóre, životy, nezranitelnost, rychlost, překážky.
-import { CONFIG } from './config.js';
+import { CONFIG, LOGICAL_W } from './config.js';
 import { createCat, updateCat, catHitbox } from './cat.js';
 import { overlaps } from './collision.js';
 import { createObstaclePool, createSpawner, obstacleHitbox } from './obstacles.js';
@@ -15,6 +15,8 @@ export function createGame(rng = Math.random) {
     lives: 0,
     invuln: 0,
     speed: 0,
+    level: 0,
+    viewW: LOGICAL_W, // logická šířka displeje (nastavuje main.js)
     time: 0,
     cat: createCat(),
     obstacles: createObstaclePool(),
@@ -38,6 +40,7 @@ export function resetGame(game) {
   game.lives = CONFIG.lives.start;
   game.invuln = 0;
   game.speed = CONFIG.speed.start;
+  game.level = 0;
   game.time = 0;
   Object.assign(game.cat, createCat());
   for (const o of game.obstacles) o.active = false;
@@ -48,6 +51,19 @@ export function resetGame(game) {
 
 function updateScore(game) {
   game.score = Math.floor(game.distance * CONFIG.score.pointsPerPx) + game.fish * CONFIG.score.fish + game.bonus;
+}
+
+// Rychlost po úrovních: každých levelEvery bodů o levelStep víc, plynule za rampTime, do stropu.
+const MAX_LEVEL = Math.ceil((CONFIG.speed.max - CONFIG.speed.start) / CONFIG.speed.levelStep);
+function updateSpeed(game, dt) {
+  const s = CONFIG.speed;
+  const level = Math.min(MAX_LEVEL, Math.floor(game.score / s.levelEvery));
+  if (level > game.level) {
+    game.level = level;
+    game.events.push('levelUp');
+  }
+  const target = Math.min(s.max, s.start + game.level * s.levelStep);
+  game.speed = Math.min(target, game.speed + (s.levelStep / s.rampTime) * dt);
 }
 
 const catBox = { x: 0, y: 0, w: 0, h: 0 };
@@ -77,16 +93,15 @@ export function stepGame(game, rawDt, held, pressed) {
   game.events.length = 0;
   if (game.status !== 'playing') return;
   const dt = Math.min(rawDt, CONFIG.maxDt);
-  const s = CONFIG.speed;
   game.time += dt;
   updateScore(game);
-  game.speed = Math.min(s.max, s.start + s.gainPerPoint * game.score);
+  updateSpeed(game, dt);
 
   const wasOnGround = game.cat.onGround;
   updateCat(game.cat, dt, held, pressed);
   if (wasOnGround && !game.cat.onGround) game.events.push('jump');
 
-  game.spawner.update(game.obstacles, dt, game.speed, game.score);
+  game.spawner.update(game.obstacles, dt, game.speed, game.score, game.viewW + 40);
   game.distance += game.speed * dt;
   updatePickups(game.pickups, game.speed * dt);
   collectPickups(game);

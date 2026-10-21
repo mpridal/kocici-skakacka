@@ -105,3 +105,33 @@ test('tlačítka jsou na obrazovce, dost velká a nepřekrývají se', () => {
     }
   }
 });
+
+test('na širokém displeji jsou tlačítka uvnitř, dost velká a nepřekrývají se', () => {
+  for (const w of [1600, 1728]) {
+    for (const screen of SCREENS) {
+      const list = layoutButtons(screen, w);
+      for (const b of list) {
+        assert.ok(b.x >= 0 && b.x + b.w <= w && b.y + b.h <= LOGICAL_H, `${w} ${screen}/${b.id} mimo`);
+      }
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          const a = list[i]; const c = list[j];
+          assert.equal(a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h, false, `${w} ${screen}: ${a.id} × ${c.id}`);
+        }
+      }
+    }
+  }
+  // pauza a zvuk drží pravý okraj, Hraj! je uprostřed
+  const pause = layoutButtons('playing', 1600).find((b) => b.id === 'pause');
+  assert.ok(1600 - (pause.x + pause.w) < 40);
+  const play = layoutButtons('intro', 1600).find((b) => b.id === 'play');
+  assert.ok(Math.abs(play.x + play.w / 2 - 800) < 1);
+});
+
+test('ťuk na Hraj! funguje i na širokém displeji', () => {
+  const { ui } = makeUI();
+  ui.setViewWidth(1600);
+  const play = layoutButtons('intro', 1600).find((b) => b.id === 'play');
+  assert.equal(ui.pointerDown(...center(play), 0), 'consumed');
+  assert.equal(ui.screen, 'playing');
+});

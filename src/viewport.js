@@ -1,11 +1,17 @@
-// Škálování logické plochy 1280×720 na skutečnou obrazovku (letterbox na střed).
+// Škálování logické plochy na skutečnou obrazovku. Výška je vždy 720,
+// šířka se přizpůsobí poměru stran (1280 až MAX_LOGICAL_W), aby telefony 20:9
+// využily celý displej. Co se nevejde, se vycentruje (letterbox).
 import { LOGICAL_W, LOGICAL_H } from './config.js';
 
+export const MAX_LOGICAL_W = 1728; // 21,6 : 9
+
 export function computeViewport(cssW, cssH, dpr) {
-  const scale = Math.min(cssW / LOGICAL_W, cssH / LOGICAL_H);
+  const logicalW = Math.round(Math.min(MAX_LOGICAL_W, Math.max(LOGICAL_W, (cssW / cssH) * LOGICAL_H)));
+  const scale = Math.min(cssW / logicalW, cssH / LOGICAL_H);
   return {
     scale,
-    offsetX: (cssW - LOGICAL_W * scale) / 2,
+    logicalW,
+    offsetX: (cssW - logicalW * scale) / 2,
     offsetY: (cssH - LOGICAL_H * scale) / 2,
     canvasW: Math.round(cssW * dpr),
     canvasH: Math.round(cssH * dpr),
