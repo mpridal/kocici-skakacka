@@ -6,6 +6,7 @@ import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
+import { createAudio } from './audio.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, updateEffects, drawEffects } from './art/effects.js';
 
@@ -17,10 +18,14 @@ let vp = null;
 const game = createGame();
 const effects = createEffects();
 const world = createWorld();
+const audio = createAudio();
+if (debugBoxes) window.__audio = audio;
 const fastDays = new URLSearchParams(location.search).has('fast');
 if (debugBoxes) window.__game = game;
 
 const input = createInput(canvas, () => {
+  audio.unlock();
+  audio.startMusic();
   if (game.status === 'over') {
     resetGame(game);
     return false;
@@ -92,6 +97,9 @@ function frame(now) {
   last = now;
   stepGame(game, dt, input.held, input.consumePress());
   for (const e of game.events) {
+    if (e === 'jump' || e === 'fish' || e === 'heart' || e === 'hit') audio.play(e);
+    else if (e === 'heartBonus') audio.play('heart');
+    else if (e === 'over') audio.stopMusic();
     if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
     else if (e === 'heart' || e === 'heartBonus') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y, '#FF8FA5');
   }
