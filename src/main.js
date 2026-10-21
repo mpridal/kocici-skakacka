@@ -120,8 +120,17 @@ function keyboardAction(now) {
   }
   return false;
 }
+// Požádat prohlížeč, ať data hry (rekord, jméno) při nedostatku místa nemaže.
+let askedPersist = false;
+function askPersist() {
+  if (askedPersist) return;
+  askedPersist = true;
+  try { navigator.storage?.persist?.().catch(() => {}); } catch { /* nejde */ }
+}
+
 const input = createInput(canvas, (clientX, clientY) => {
   audio.unlock();
+  askPersist();
   if (vp.portrait) return false;
   const now = performance.now();
   if (clientX < 0) return keyboardAction(now);

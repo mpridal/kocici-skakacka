@@ -59,6 +59,7 @@ Po úpravě spusťte testy (`npm test`), které hlídají, že hra zůstane fér
 
 - `npm run serve` spustí místní server na http://localhost:8080/.
 - `npm test` spustí testy (Node 22+ bez dalších balíčků).
+- `node tools/install-hook.mjs` jednou nainstaluje kontrolu, že se jméno dítěte nedostane do commitu (zakázaná slova jsou v souboru `.private-names`, který git nesleduje).
 - Užitečné parametry adresy: `?nosw` (bez offline cache), `?boxes` (zobrazí kolizní boxy), `?fast` (rychlé střídání dne a noci).
 - `tools/gallery.html` ukáže všechny postavičky a animace. `tools/make-icons.html?save` znovu vyrobí ikony.
 - Pokud vývojový prohlížeč drží starou verzi, odregistrujte service worker (DevTools → Application → Service workers).
