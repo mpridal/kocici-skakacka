@@ -44,6 +44,7 @@ export const CONFIG = deepFreeze({
     extraGapMin: 0.2,     // náhodná mezera navíc (v sekundách běhu)
     extraGapMax: 1.2,
     pairChance: 0.2,      // šance na dvojici avokád
+    pairFromScore: 150,   // dvojice (potřebují vyšší skok) až od tolika bodů
     squirrelFromScore: 300,
     squirrelChance: 0.3,
     avocadoScale: 1.3,    // velikost kresby avokáda

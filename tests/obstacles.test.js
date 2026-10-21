@@ -151,3 +151,10 @@ test('plný pool nealokuje a spawn počká', () => {
   spawner.update(pool, 1 / 60, 330, 0);
   assert.equal(pool[0].active, true);
 });
+
+test('dvojice avokád se objevují až od pairFromScore bodů', () => {
+  const before = runSpawner(5, CONFIG.speed.start, CONFIG.obstacles.pairFromScore - 1, 2000);
+  assert.equal(before.some((o) => o.kind === 'avo-pair'), false);
+  const after = runSpawner(5, CONFIG.speed.start, CONFIG.obstacles.pairFromScore, 2000);
+  assert.equal(after.some((o) => o.kind === 'avo-pair'), true);
+});

@@ -90,8 +90,9 @@ export function createSpawner(rng = Math.random, onGap = null) {
   function pickKind(score) {
     if (score >= o.squirrelFromScore && rng() < o.squirrelChance) return 'squirrel';
     const r = rng();
-    if (r < o.pairChance) return 'avo-pair';
-    return r < o.pairChance + (1 - o.pairChance) / 2 ? 'avo-small' : 'avo-big';
+    const pair = score >= o.pairFromScore ? o.pairChance : 0;
+    if (r < pair) return 'avo-pair';
+    return r < pair + (1 - pair) / 2 ? 'avo-small' : 'avo-big';
   }
 
   return {
