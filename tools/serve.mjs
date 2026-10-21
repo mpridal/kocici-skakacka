@@ -20,12 +20,21 @@ const types = {
 
 createServer(async (req, res) => {
   // Dev pomůcka: POST /__shot s data-URL plátna uloží snímek do .superpowers/shot.png
-  if (req.method === 'POST' && req.url === '/__shot') {
+  // Dev pomůcka: POST /__save?path=icons/x.png uloží ikonu z tools/make-icons.html (jen do icons/).
+  const url = new URL(req.url, 'http://x');
+  if (req.method === 'POST' && (url.pathname === '/__shot' || url.pathname === '/__save')) {
+    const rel = url.pathname === '/__shot' ? '.superpowers/shot.png' : url.searchParams.get('path') || '';
+    if (url.pathname === '/__save' && !/^icons\/[\w-]+\.png$/.test(rel)) {
+      res.writeHead(400);
+      res.end('jen icons/*.png');
+      return;
+    }
     let body = '';
     req.on('data', (c) => { body += c; });
     req.on('end', async () => {
-      await mkdir(join(root, '.superpowers'), { recursive: true });
-      await writeFile(join(root, '.superpowers', 'shot.png'), Buffer.from(body.split(',')[1] || '', 'base64'));
+      const file = join(root, rel);
+      await mkdir(dirname(file), { recursive: true });
+      await writeFile(file, Buffer.from(body.split(',')[1] || '', 'base64'));
       res.end('ok');
     });
     return;

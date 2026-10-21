@@ -1,0 +1,17 @@
+{
+  "name": "Kočičí skákačka",
+  "short_name": "Kočičí skákačka",
+  "description": "Kočička skáče přes avokáda a chytá rybičky.",
+  "lang": "cs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#CDEBFA",
+  "background_color": "#CDEBFA",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

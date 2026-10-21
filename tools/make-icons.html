@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Výroba ikon</title>
+<style>body{background:#888;display:flex;gap:16px;align-items:flex-start;padding:16px}canvas{background:#fff}</style>
+</head>
+<body>
+<canvas id="i192" width="192" height="192"></canvas>
+<canvas id="i512" width="512" height="512"></canvas>
+<canvas id="m512" width="512" height="512"></canvas>
+<script type="module">
+// Vykreslí ikony (hlavička kočičky Mourek). S ?save je dev server uloží do icons/.
+import { CONFIG } from '../src/config.js';
+import { drawCatHead } from '../src/art/cat.js';
+
+const skin = CONFIG.skins[0];
+function icon(id, maskable) {
+  const c = document.getElementById(id);
+  const ctx = c.getContext('2d');
+  const n = c.width;
+  ctx.fillStyle = '#CDEBFA';
+  if (maskable) {
+    ctx.fillRect(0, 0, n, n);
+  } else {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, n, n, n * 0.22);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#F7E6C4';
+  ctx.fillRect(0, n * (maskable ? 0.78 : 0.8), n, n);
+  // maskable: obsah v bezpečné zóně (střední kruh 80 %)
+  drawCatHead(ctx, n / 2, n * 0.56, n * (maskable ? 0.52 : 0.68), skin);
+  return c;
+}
+const out = [['icons/icon-192.png', icon('i192', false)], ['icons/icon-512.png', icon('i512', false)], ['icons/icon-maskable-512.png', icon('m512', true)]];
+if (location.search.includes('save')) {
+  for (const [path, c] of out) {
+    await fetch(`/__save?path=${encodeURIComponent(path)}`, { method: 'POST', body: c.toDataURL('image/png') });
+  }
+  document.title = 'Uloženo';
+}
+</script>
+</body>
+</html>
