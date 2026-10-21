@@ -46,11 +46,13 @@ test('vývojové soubory v offline seznamu nejsou', () => {
   }
 });
 
-test('manifest: název, fullscreen, na šířku, ikony', () => {
+test('manifest: název, fullscreen, bez vynucené orientace, ikony', () => {
   const m = JSON.parse(readFileSync(join(root, 'manifest.webmanifest'), 'utf8'));
   assert.equal(m.name, 'Kočičí skákačka');
   assert.equal(m.display, 'fullscreen');
-  assert.equal(m.orientation, 'landscape');
+  // Vynucená orientace zavírala aplikaci při spuštění na výšku (telefon pod Family Link);
+  // na šířku se zamyká až za běhu (main.js).
+  assert.equal(m.orientation, undefined);
   const sizes = m.icons.map((i) => i.sizes);
   assert.ok(sizes.includes('192x192') && sizes.includes('512x512'));
   assert.ok(m.icons.some((i) => (i.purpose || '').includes('maskable')));

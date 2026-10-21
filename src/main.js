@@ -123,8 +123,20 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---------- velikost ----------
+// Zámek na šířku až za běhu a jen když už zařízení na šířku je (nic se tím neotáčí).
+// Vynucená orientace v manifestu zavírala aplikaci spuštěnou na výšku.
+function lockLandscape() {
+  try {
+    if (!vp.portrait && screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
+  } catch { /* zámek není k dispozici */ }
+}
+document.addEventListener('fullscreenchange', lockLandscape);
+
 function resize() {
   vp = computeViewport(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+  lockLandscape();
   canvas.width = vp.canvasW;
   canvas.height = vp.canvasH;
   if (nameInput.style.display === 'block') placeNameInput();
