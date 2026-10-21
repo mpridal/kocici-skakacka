@@ -1,5 +1,6 @@
 // Service worker: při instalaci uloží všechny soubory hry, pak hra běží i bez internetu.
-// Nová verze (změněné CACHE_VERSION) se stáhne na pozadí a projeví se při dalším spuštění.
+// Nová verze (změněné CACHE_VERSION) se stáhne na pozadí a zapne se na úvodní obrazovce,
+// nebo nejpozději při dalším spuštění. Uprostřed hraní nikdy.
 const CACHE_VERSION = 'kocka-v1';
 const PRECACHE = [
   './',
@@ -29,6 +30,7 @@ const PRECACHE = [
   'src/pickups.js',
   'src/storage.js',
   'src/tutorial.js',
+  'src/update.js',
   'src/ui-draw.js',
   'src/ui.js',
   'src/viewport.js',
@@ -39,6 +41,11 @@ self.addEventListener('install', (event) => {
   // cache: 'reload' = vždy čerstvé soubory ze sítě, ne starší kopie z HTTP cache prohlížeče
   event.waitUntil(caches.open(CACHE_VERSION).then((cache) =>
     cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'reload' })))));
+});
+
+// Hra požádá o převzetí řízení, až je na úvodní obrazovce (src/update.js).
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

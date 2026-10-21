@@ -12,6 +12,7 @@ import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
 import { hintFor } from './tutorial.js';
 import { newlyUnlocked } from './accessories.js';
+import { startAutoUpdate } from './update.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -295,3 +296,4 @@ function frame(now) {
 
 resize();
 requestAnimationFrame(frame);
+if (!params.has('nosw')) startAutoUpdate(() => ui.screen);

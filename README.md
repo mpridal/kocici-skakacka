@@ -29,7 +29,7 @@ Na úvodní obrazovce je vpravo dole malé ozubené kolečko. **Podržte ho asi 
 
 ### 4. Aktualizace
 
-Když nahrajete novou verzi na GitHub a tablet bude připojený k internetu, nová verze se stáhne na pozadí. Projeví se při **dalším spuštění** hry (aplikaci je potřeba úplně zavřít, např. odsunutím z přehledu aplikací). Rozehraná hra se nikdy nepřeruší.
+Když nahrajete novou verzi na GitHub a tablet bude připojený k internetu, nová verze se stáhne na pozadí. Hra se na ni sama přepne, jakmile je na **úvodní obrazovce** (krátce se znovu načte). Rozehraná hra se nikdy nepřeruší.
 
 ### 5. Úprava obtížnosti
 
