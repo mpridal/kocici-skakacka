@@ -39,7 +39,7 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 |---|---|---|
 | `speed.start` | počáteční rychlost běhu | 330 |
 | `speed.max` | nejvyšší rychlost (strop) | 560 |
-| `speed.gainPerPoint` | jak rychle hra zrychluje | 0.15 |
+| `speed.gainPerPoint` | jak rychle hra zrychluje | 0.1 |
 | `cat.jumpVelocity` | síla odrazu (výška skoku) | 980 |
 | `cat.maxHoldTime` | jak dlouho jde skok prodlužovat držením | 0.3 s |
 | `cat.hitboxShrinkX` / `Y` | o kolik je kolize shovívavější než obrázek | 0.4 / 0.25 |

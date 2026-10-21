@@ -82,7 +82,7 @@ export function drawWorld(ctx, world) {
     ctx.globalAlpha = pal.sunAlpha;
     ctx.fillStyle = '#FFE9A3';
     ctx.beginPath();
-    ctx.arc(1040, arcY, 42, 0, Math.PI * 2);
+    ctx.arc(860, arcY, 42, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -90,13 +90,13 @@ export function drawWorld(ctx, world) {
     ctx.globalAlpha = pal.moonAlpha;
     ctx.fillStyle = '#FFF6D6';
     ctx.beginPath();
-    ctx.arc(1040, 120, 36, 0, Math.PI * 2);
+    ctx.arc(860, 120, 36, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#F1E5B8';
     ctx.beginPath();
-    ctx.arc(1028, 110, 7, 0, Math.PI * 2);
-    ctx.moveTo(1057, 132);
-    ctx.arc(1052, 132, 5, 0, Math.PI * 2);
+    ctx.arc(848, 110, 7, 0, Math.PI * 2);
+    ctx.moveTo(877, 132);
+    ctx.arc(872, 132, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
