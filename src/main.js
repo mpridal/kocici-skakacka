@@ -1,56 +1,160 @@
 // Start hry, herní smyčka a přepínání obrazovek.
 import { CONFIG, LOGICAL_W, LOGICAL_H } from './config.js';
-import { computeViewport } from './viewport.js';
+import { computeViewport, toLogical } from './viewport.js';
 import { createInput } from './input.js';
+import { createStorage } from './storage.js';
 import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
+import { createUI, layoutButtons } from './ui.js';
+import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio } from './audio.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
-import { createEffects, spawnSparkles, updateEffects, drawEffects } from './art/effects.js';
+import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
-const debugBoxes = new URLSearchParams(location.search).has('boxes');
+const params = new URLSearchParams(location.search);
+const debugBoxes = params.has('boxes');
+const fastDays = params.has('fast');
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+const nameInput = document.getElementById('name');
+nameInput.maxLength = CONFIG.ui.nameMaxLength;
 let vp = null;
+
+const storage = createStorage();
 const game = createGame();
 const effects = createEffects();
 const world = createWorld();
 const audio = createAudio();
-if (debugBoxes) window.__audio = audio;
-const fastDays = new URLSearchParams(location.search).has('fast');
-if (debugBoxes) window.__game = game;
 
-const input = createInput(canvas, () => {
-  audio.unlock();
+const startRun = () => {
+  resetGame(game);
+  clearEffects(effects);
   audio.startMusic();
-  if (game.status === 'over') {
-    resetGame(game);
-    return false;
+};
+
+const ui = createUI(storage, {
+  onStart: startRun,
+  onRestart: startRun,
+  onResume: () => audio.startMusic(),
+  onPause: () => audio.stopMusic(),
+  onHome: () => { audio.stopMusic(); resetGame(game); clearEffects(effects); },
+  onMute: (m) => audio.setMuted(m),
+  onParentOpen: () => showNameInput(true),
+  onParentClose: () => showNameInput(false),
+  onSave: () => ui.setName(nameInput.value),
+});
+if (debugBoxes) Object.assign(window, { __game: game, __audio: audio, __ui: ui });
+audio.setMuted(ui.settings.muted);
+
+// ---------- rodičovské pole pro jméno (HTML input přes canvas) ----------
+function placeNameInput() {
+  const s = vp.scale;
+  Object.assign(nameInput.style, {
+    left: `${vp.offsetX + NAME_BOX.x * s}px`,
+    top: `${vp.offsetY + NAME_BOX.y * s}px`,
+    width: `${NAME_BOX.w * s}px`,
+    height: `${NAME_BOX.h * s}px`,
+    fontSize: `${48 * s}px`,
+  });
+}
+function showNameInput(show) {
+  if (show) {
+    nameInput.value = ui.settings.name;
+    placeNameInput();
+    nameInput.style.display = 'block';
+    nameInput.focus();
+  } else {
+    nameInput.blur();
+    nameInput.style.display = 'none';
   }
-  return true;
+}
+nameInput.addEventListener('keydown', (e) => {
+  e.stopPropagation();
+  if (e.key === 'Enter') {
+    ui.setName(nameInput.value);
+    ui.go('intro', performance.now());
+    showNameInput(false);
+  }
+});
+nameInput.addEventListener('keyup', (e) => e.stopPropagation());
+
+// ---------- fullscreen po prvním dotyku (pokud to neudělal manifest) ----------
+let triedFullscreen = false;
+canvas.addEventListener('pointerdown', (e) => {
+  if (triedFullscreen || e.pointerType !== 'touch') return;
+  triedFullscreen = true;
+  const standalone = matchMedia('(display-mode: fullscreen)').matches;
+  if (!standalone && document.fullscreenEnabled && !document.fullscreenElement) {
+    document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  }
+});
+
+// ---------- vstup ----------
+const pt = { x: 0, y: 0 };
+// Klávesnice (testování na PC): mezerník = skok, nebo hlavní tlačítko obrazovky.
+const KEY_BUTTON = { intro: 'play', paused: 'resume', over: 'again' };
+function keyboardAction(now) {
+  if (ui.screen === 'playing') return ui.pointerDown(-100, -100, now) === 'jump';
+  const id = KEY_BUTTON[ui.screen];
+  if (id) {
+    const b = layoutButtons(ui.screen).find((x) => x.id === id);
+    ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, now);
+    ui.pointerUp();
+  }
+  return false;
+}
+const input = createInput(canvas, (clientX, clientY) => {
+  audio.unlock();
+  if (vp.portrait) return false;
+  const now = performance.now();
+  if (clientX < 0) return keyboardAction(now);
+  toLogical(vp, clientX, clientY, pt);
+  return ui.pointerDown(pt.x, pt.y, now) === 'jump';
 });
 input.attach();
+window.addEventListener('pointerup', () => ui.pointerUp());
+window.addEventListener('pointercancel', () => ui.pointerUp());
+window.addEventListener('contextmenu', (e) => e.preventDefault());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { ui.pause(performance.now()); audio.stopMusic(); }
+});
 
+// ---------- velikost ----------
 function resize() {
   vp = computeViewport(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
   canvas.width = vp.canvasW;
   canvas.height = vp.canvasH;
-  draw();
+  if (nameInput.style.display === 'block') placeNameInput();
+  if (vp.portrait) ui.pause(performance.now());
+  draw(performance.now());
 }
 window.addEventListener('resize', resize);
-window.addEventListener('contextmenu', (e) => e.preventDefault());
 
+// ---------- kreslení ----------
 const box = { x: 0, y: 0, w: 0, h: 0 };
 
-function draw() {
+function drawDebugBoxes() {
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 2;
+  for (const o of game.obstacles) {
+    if (!o.active) continue;
+    obstacleHitbox(o, box);
+    ctx.strokeRect(box.x, box.y, box.w, box.h);
+  }
+  catHitbox(game.cat, box);
+  ctx.strokeRect(box.x, box.y, box.w, box.h);
+}
+
+function draw(now) {
+  const t = now / 1000;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   // letterbox: nahoře barva nebe, dole barva cestičky
-  ctx.fillStyle = world.palette.skyTop;
+  ctx.fillStyle = vp.portrait ? '#CDEBFA' : world.palette.skyTop;
   ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
-  ctx.fillStyle = world.palette.path;
+  ctx.fillStyle = vp.portrait ? '#CDEBFA' : world.palette.path;
   ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
   const s = vp.scale * vp.dpr;
   ctx.setTransform(s, 0, 0, s, vp.offsetX * vp.dpr, vp.offsetY * vp.dpr);
@@ -58,55 +162,79 @@ function draw() {
   ctx.beginPath();
   ctx.rect(0, 0, LOGICAL_W, LOGICAL_H);
   ctx.clip();
+
+  if (vp.portrait) {
+    // na výšku: výzva přes celou šířku displeje, vycentrovaná
+    ctx.restore();
+    const k = (vp.cssW / 760) * vp.dpr;
+    ctx.setTransform(k, 0, 0, k, canvas.width / 2 - 640 * k, canvas.height / 2 - 400 * k);
+    drawRotate(ctx, t);
+    return;
+  }
   drawWorld(ctx, world);
-
-  for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);
-  for (const p of game.pickups) if (p.active) drawPickup(ctx, p, game.time);
-  drawGameCat(ctx, game, CONFIG.skins[0]);
-  drawEffects(ctx, effects);
+  const best = storage.getBest();
+  if (ui.screen === 'intro' || ui.screen === 'parent') {
+    drawIntro(ctx, ui, best, t);
+  } else {
+    for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);
+    for (const p of game.pickups) if (p.active) drawPickup(ctx, p, game.time);
+    drawGameCat(ctx, game, ui.skin);
+    if (debugBoxes) drawDebugBoxes();
+    if (ui.screen === 'playing') drawHud(ctx, game, ui);
+  }
   ctx.restore();
-  if (debugBoxes) {
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    for (const o of game.obstacles) {
-      if (!o.active) continue;
-      obstacleHitbox(o, box);
-      ctx.strokeRect(box.x, box.y, box.w, box.h);
-    }
-    catHitbox(game.cat, box);
-    ctx.strokeRect(box.x, box.y, box.w, box.h);
-  }
 
-  ctx.fillStyle = '#3A2F45';
-  ctx.font = '600 40px system-ui, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('♥'.repeat(game.lives), 30, 60);
-  ctx.textAlign = 'right';
-  ctx.fillText(String(game.score), LOGICAL_W - 30, 60);
-  if (game.status === 'over') {
-    ctx.textAlign = 'center';
-    ctx.fillText('Konec hry! Ťukni pro novou hru', LOGICAL_W / 2, 330);
+  if (ui.screen === 'paused' || ui.screen === 'over' || ui.screen === 'parent') {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = DIM;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(s, 0, 0, s, vp.offsetX * vp.dpr, vp.offsetY * vp.dpr);
+    if (ui.screen === 'paused') drawPaused(ctx, ui);
+    if (ui.screen === 'over') drawOver(ctx, ui, game, best, now);
+    if (ui.screen === 'parent') drawParent(ctx, ui);
   }
+  drawEffects(ctx, effects);
 }
 
-resize();
+// ---------- smyčka ----------
+function handleEvents(now) {
+  for (const e of game.events) {
+    if (e === 'jump' || e === 'fish' || e === 'hit') audio.play(e);
+    if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
+    if (e === 'heart' || e === 'heartBonus') {
+      audio.play('heart');
+      spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y, '#FF8FA5');
+    }
+    if (e === 'over') {
+      audio.stopMusic();
+      const record = game.score > storage.getBest();
+      storage.setBest(game.score);
+      ui.gameOver(now, record);
+      if (record) {
+        spawnConfetti(effects, LOGICAL_W);
+        audio.play('record');
+      }
+    }
+  }
+}
 
 let last = performance.now();
 function frame(now) {
-  const dt = (now - last) / 1000;
+  const dt = Math.min((now - last) / 1000, CONFIG.maxDt);
   last = now;
-  stepGame(game, dt, input.held, input.consumePress());
-  for (const e of game.events) {
-    if (e === 'jump' || e === 'fish' || e === 'heart' || e === 'hit') audio.play(e);
-    else if (e === 'heartBonus') audio.play('heart');
-    else if (e === 'over') audio.stopMusic();
-    if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
-    else if (e === 'heart' || e === 'heartBonus') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y, '#FF8FA5');
+  ui.update(now);
+  if (ui.screen === 'playing' && !vp.portrait) {
+    stepGame(game, dt, input.held, input.consumePress());
+    handleEvents(now);
+  } else {
+    input.clearPress();
   }
-  updateEffects(effects, Math.min(dt, CONFIG.maxDt));
-  const worldDt = Math.min(dt, CONFIG.maxDt);
-  updateWorld(world, worldDt, game.status === 'playing' ? game.speed : 0, fastDays ? game.time * 60 : game.score);
-  draw();
+  updateEffects(effects, dt);
+  const speed = ui.screen === 'playing' ? game.speed : ui.screen === 'intro' ? 40 : 0;
+  updateWorld(world, dt, speed, fastDays ? (now / 1000) * 60 : game.score);
+  draw(now);
   requestAnimationFrame(frame);
 }
+
+resize();
 requestAnimationFrame(frame);

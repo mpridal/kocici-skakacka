@@ -50,7 +50,7 @@ function tiled(ctx, d, offset, fill) {
   ctx.save();
   ctx.translate(-offset, 0);
   ctx.fill(p);
-  ctx.translate(TILE, 0);
+  ctx.translate(TILE - 1, 0); // 1 px překryv, ať mezi dílky není vidět šev
   ctx.fill(p);
   ctx.restore();
 }

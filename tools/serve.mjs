@@ -1,6 +1,6 @@
 // Jednoduchý dev server statických souborů (jen pro vývoj, http://localhost:8080).
 import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 
@@ -19,6 +19,17 @@ const types = {
 };
 
 createServer(async (req, res) => {
+  // Dev pomůcka: POST /__shot s data-URL plátna uloží snímek do .superpowers/shot.png
+  if (req.method === 'POST' && req.url === '/__shot') {
+    let body = '';
+    req.on('data', (c) => { body += c; });
+    req.on('end', async () => {
+      await mkdir(join(root, '.superpowers'), { recursive: true });
+      await writeFile(join(root, '.superpowers', 'shot.png'), Buffer.from(body.split(',')[1] || '', 'base64'));
+      res.end('ok');
+    });
+    return;
+  }
   try {
     let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (path.endsWith('/')) path += 'index.html';
