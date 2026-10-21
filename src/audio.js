@@ -1,5 +1,6 @@
 // Zvuky a hudba generované přes Web Audio (žádné soubory).
 // AudioContext vzniká až po prvním dotyku (požadavek prohlížečů).
+import { CONFIG } from './config.js';
 
 const NOTE = (midi) => 440 * 2 ** ((midi - 69) / 12);
 
@@ -13,6 +14,14 @@ const MELODY = [
 const BASS = [48, 48, 53, 53, 55, 55, 48, 48]; // jedna nota na půl taktu
 const EIGHTH = 0.2; // s (tempo 150 BPM)
 
+// Tempo hudby roste se zrychlováním hry: start = 1, nejvyšší rychlost = MAX_TEMPO.
+export const MAX_TEMPO = 1.3;
+export function tempoForSpeed(speed) {
+  const { start, max } = CONFIG.speed;
+  const k = Math.min(1, Math.max(0, (speed - start) / (max - start)));
+  return 1 + k * (MAX_TEMPO - 1);
+}
+
 export function createAudio() {
   let ctx = null;
   let master = null;
@@ -22,6 +31,8 @@ export function createAudio() {
   let musicTimer = null;
   let nextNoteTime = 0;
   let step = 0;
+  let tempo = 1;        // právě hrané tempo
+  let wantedTempo = 1;  // nové tempo se použije od začátku dalšího taktu
 
   function unlock() {
     try {
@@ -75,13 +86,15 @@ export function createAudio() {
 
   function scheduleMusic() {
     while (nextNoteTime < ctx.currentTime + 0.3) {
+      if (step % 8 === 0) tempo = wantedTempo;
+      const eighth = EIGHTH / tempo;
       const m = MELODY[step % MELODY.length];
-      if (m) tone(NOTE(m), nextNoteTime, EIGHTH * 0.9, { type: 'triangle', vol: 0.5, dest: music });
+      if (m) tone(NOTE(m), nextNoteTime, eighth * 0.9, { type: 'triangle', vol: 0.5, dest: music });
       if (step % 4 === 0) {
         const b = BASS[Math.floor(step / 4) % BASS.length];
-        tone(NOTE(b), nextNoteTime, EIGHTH * 3.6, { type: 'sine', vol: 0.6, dest: music });
+        tone(NOTE(b), nextNoteTime, eighth * 3.6, { type: 'sine', vol: 0.6, dest: music });
       }
-      nextNoteTime += EIGHTH;
+      nextNoteTime += eighth;
       step++;
     }
   }
@@ -97,9 +110,12 @@ export function createAudio() {
       if (!ctx || muted || !SOUNDS[name]) return;
       try { SOUNDS[name](ctx.currentTime + 0.01); } catch { /* bez zvuku */ }
     },
+    setTempo(t) { wantedTempo = t; },
+    get tempo() { return tempo; },
     startMusic() {
       if (!ctx || musicTimer) return;
       step = 0;
+      tempo = wantedTempo;
       nextNoteTime = ctx.currentTime + 0.05;
       scheduleMusic();
       musicTimer = setInterval(scheduleMusic, 100);

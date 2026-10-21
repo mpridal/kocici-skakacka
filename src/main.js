@@ -9,7 +9,7 @@ import { obstacleHitbox } from './obstacles.js';
 import { createUI, layoutButtons } from './ui.js';
 import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
-import { createAudio } from './audio.js';
+import { createAudio, tempoForSpeed } from './audio.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -31,6 +31,7 @@ const audio = createAudio();
 
 const startRun = () => {
   resetGame(game);
+  audio.setTempo(1);
   levelUpAt = -1e9;
   clearEffects(effects);
   audio.startMusic();
@@ -258,6 +259,7 @@ function frame(now) {
   ui.update(now);
   if (ui.screen === 'playing' && !vp.portrait) {
     stepGame(game, dt, input.held, input.consumePress());
+    audio.setTempo(tempoForSpeed(game.speed));
     handleEvents(now);
   } else {
     input.clearPress();
