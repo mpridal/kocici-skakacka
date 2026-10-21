@@ -15,8 +15,9 @@ const LAYOUT = {
     { id: 'prev', x: 300, y: 280, w: 110, h: 110 },
     { id: 'next', x: 870, y: 280, w: 110, h: 110 },
     ...skinButtons,
-    { id: 'play', x: 490, y: 592, w: 300, h: 108 },
-    { id: 'exit', x: 810, y: 592, w: 260, h: 108 },
+    // Hraj! a Konec: stejně velké, jako dvojice uprostřed (mezera 24)
+    { id: 'play', x: 348, y: 592, w: 280, h: 108 },
+    { id: 'exit', x: 652, y: 592, w: 280, h: 108 },
     { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
     { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],

@@ -125,7 +125,8 @@ test('na širokém displeji jsou tlačítka uvnitř, dost velká a nepřekrývaj
   const pause = layoutButtons('playing', 1600).find((b) => b.id === 'pause');
   assert.ok(1600 - (pause.x + pause.w) < 40);
   const play = layoutButtons('intro', 1600).find((b) => b.id === 'play');
-  assert.ok(Math.abs(play.x + play.w / 2 - 800) < 1);
+  const exit = layoutButtons('intro', 1600).find((b) => b.id === 'exit');
+  assert.ok(Math.abs((play.x + exit.x + exit.w) / 2 - 800) < 1, 'dvojice Hraj!/Konec je uprostřed');
 });
 
 test('ťuk na Hraj! funguje i na širokém displeji', () => {
@@ -168,4 +169,14 @@ test('když se okno nezavře, ukáže se rozloučení a jde se vrátit', () => {
   assert.equal(ui.screen, 'bye');
   assert.equal(ui.pointerDown(...center(btn('bye', 'stay')), 100), 'consumed');
   assert.equal(ui.screen, 'intro');
+});
+
+test('Hraj! a Konec jsou stejně velké, v jedné řadě a jako dvojice uprostřed', () => {
+  const play = btn('intro', 'play');
+  const exit = btn('intro', 'exit');
+  assert.equal(play.w, exit.w);
+  assert.equal(play.h, exit.h);
+  assert.equal(play.y, exit.y);
+  assert.ok(Math.abs((play.x + exit.x + exit.w) / 2 - 640) < 1);
+  assert.ok(exit.x - (play.x + play.w) >= 16 && exit.x - (play.x + play.w) <= 40, 'rozumná mezera');
 });
