@@ -10,10 +10,10 @@ const FONT = '"Nunito", "Arial Rounded MT Bold", "Comic Sans MS", system-ui, san
 const TEXT = '#3A2F45';
 const BTN = {
   play: '#FF8FA5', again: '#FF8FA5', resume: '#FF8FA5', save: '#AEDDA2',
-  home: '#FFE9A3', back: '#FFE9A3', pause: '#FFFFFF', sound: '#FFFFFF', gear: '#FFFFFF',
+  home: '#FFE9A3', back: '#FFE9A3', exit: '#B6DDF7', stay: '#FF8FA5', pause: '#FFFFFF', sound: '#FFFFFF', gear: '#FFFFFF',
   prev: '#FFFFFF', next: '#FFFFFF',
 };
-const LABEL = { play: 'Hraj!', again: 'Znovu', resume: 'Pokračovat', home: 'Domů', save: 'Uložit', back: 'Zpět' };
+const LABEL = { stay: 'Hrát dál', exit: 'Konec', play: 'Hraj!', again: 'Znovu', resume: 'Pokračovat', home: 'Domů', save: 'Uložit', back: 'Zpět' };
 
 export function text(ctx, s, x, y, size, { color = TEXT, align = 'center', outline = '#FFFFFF', weight = 800 } = {}) {
   ctx.font = `${weight} ${size}px ${FONT}`;
@@ -155,7 +155,26 @@ export function iconTrophy(ctx, cx, cy, s) {
   roundRect(ctx, cx - s * 0.26, cy + s * 0.26, s * 0.52, s * 0.14, 4); ctx.fill(); ctx.stroke();
 }
 
+// Dveře se šipkou ven.
+function iconExit(ctx, cx, cy, s) {
+  ctx.fillStyle = '#FFFFFF';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = OUTLINE;
+  roundRect(ctx, cx - s * 0.34, cy - s * 0.42, s * 0.44, s * 0.84, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = OUTLINE;
+  ctx.beginPath(); ctx.arc(cx + s * 0.02, cy, s * 0.05, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = s * 0.11;
+  ctx.beginPath();
+  ctx.moveTo(cx + s * 0.12, cy); ctx.lineTo(cx + s * 0.44, cy);
+  ctx.moveTo(cx + s * 0.3, cy - s * 0.15); ctx.lineTo(cx + s * 0.44, cy); ctx.lineTo(cx + s * 0.3, cy + s * 0.15);
+  ctx.stroke();
+}
+
 const ICONS = {
+  exit: iconExit,
+  stay: iconPlay,
   play: iconPlay, again: iconAgain, resume: iconPlay, home: iconHome, pause: iconPause,
   gear: iconGear, save: iconCheck, back: (c, x, y, s) => iconChevron(c, x, y, s, -1),
   prev: (c, x, y, s) => iconChevron(c, x, y, s, -1), next: (c, x, y, s) => iconChevron(c, x, y, s, 1),
@@ -321,6 +340,18 @@ export function drawParent(ctx, ui) {
   ctx.strokeStyle = OUTLINE;
   ctx.stroke();
   for (const b of layoutButtons('parent')) button(ctx, b, ui);
+  ctx.restore();
+}
+
+export function drawBye(ctx, ui, t) {
+  ctx.save();
+  ctx.translate(centerShift(ui), 0);
+  panel(ctx, 300, 90, 680, 540);
+  text(ctx, ui.settings.name ? `Pa pa, ${ui.settings.name}!` : 'Pa pa!', 640, 160, 64, { outline: null, color: '#D4537E' });
+  drawCat(ctx, 620, 330, 2, ui.skin, t % 2.4 < 0.2 ? 'blink' : 'idle', t);
+  text(ctx, 'Hru zavřeš tlačítkem Zpět', 640, 382, 32, { outline: null, weight: 700 });
+  text(ctx, 'nebo Domů na telefonu.', 640, 424, 32, { outline: null, weight: 700 });
+  for (const b of layoutButtons('bye')) button(ctx, b, ui);
   ctx.restore();
 }
 

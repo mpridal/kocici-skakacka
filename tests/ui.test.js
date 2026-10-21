@@ -150,3 +150,22 @@ test('ve hře jde vypnout a zapnout zvuk a ťuk na tlačítko neskáče', () => 
   assert.equal(storage.getSettings().muted, false);
   assert.deepEqual(muted, [true, false]);
 });
+
+test('tlačítko Konec je vedle Hraj! a požádá o zavření aplikace', () => {
+  const calls = [];
+  const ui = createUI(createStorage(undefined), { onExit: () => calls.push('exit') });
+  const play = btn('intro', 'play');
+  const exit = btn('intro', 'exit');
+  assert.ok(exit, 'na úvodu je tlačítko Konec');
+  assert.ok(Math.abs(exit.y - play.y) < 1 && exit.x > play.x + play.w, 'Konec je vpravo vedle Hraj!');
+  assert.equal(ui.pointerDown(...center(exit), 0), 'consumed');
+  assert.deepEqual(calls, ['exit']);
+});
+
+test('když se okno nezavře, ukáže se rozloučení a jde se vrátit', () => {
+  const { ui } = makeUI();
+  ui.showBye(0);
+  assert.equal(ui.screen, 'bye');
+  assert.equal(ui.pointerDown(...center(btn('bye', 'stay')), 100), 'consumed');
+  assert.equal(ui.screen, 'intro');
+});

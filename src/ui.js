@@ -4,7 +4,7 @@
 // na střed a tlačítka označená a: 'r' zůstanou u pravého okraje.
 import { CONFIG, LOGICAL_W } from './config.js';
 
-export const SCREENS = ['intro', 'playing', 'paused', 'over', 'parent'];
+export const SCREENS = ['intro', 'playing', 'paused', 'over', 'parent', 'bye'];
 const JUMP_GUARD_MS = 250; // po startu/pokračování chvíli neskákat
 
 const SKIN_ROW_Y = 470;
@@ -16,6 +16,7 @@ const LAYOUT = {
     { id: 'next', x: 870, y: 280, w: 110, h: 110 },
     ...skinButtons,
     { id: 'play', x: 490, y: 592, w: 300, h: 108 },
+    { id: 'exit', x: 810, y: 592, w: 260, h: 108 },
     { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
     { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],
@@ -31,6 +32,7 @@ const LAYOUT = {
     { id: 'again', x: 350, y: 540, w: 280, h: 116 },
     { id: 'home', x: 650, y: 540, w: 280, h: 116 },
   ],
+  bye: [{ id: 'stay', x: 465, y: 470, w: 350, h: 104 }],
   parent: [
     { id: 'save', x: 370, y: 450, w: 260, h: 104 },
     { id: 'back', x: 650, y: 450, w: 260, h: 104 },
@@ -101,6 +103,11 @@ export function createUI(storage, cb = {}) {
       if (screen === 'playing') ui.jumpGuardUntil = now + JUMP_GUARD_MS;
     },
 
+    // Rozloučení, když prohlížeč nedovolí okno zavřít.
+    showBye(now) {
+      ui.go('bye', now);
+    },
+
     pause(now) {
       if (ui.screen !== 'playing') return;
       ui.go('paused', now);
@@ -128,6 +135,7 @@ export function createUI(storage, cb = {}) {
           return now < ui.jumpGuardUntil ? 'consumed' : 'jump';
         case 'intro':
           if (id === 'play') { ui.go('playing', now); call('onStart'); }
+          else if (id === 'exit') call('onExit');
           else if (id === 'prev') ui.setSkin(ui.skinIndex - 1);
           else if (id === 'next') ui.setSkin(ui.skinIndex + 1);
           else if (id && id.startsWith('skin-')) ui.setSkin(Number(id.slice(5)));
@@ -142,6 +150,9 @@ export function createUI(storage, cb = {}) {
           if (!ui.overButtonsActive(now)) { ui.pressed = null; return 'consumed'; }
           if (id === 'again') { ui.go('playing', now); call('onRestart'); }
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
+          return 'consumed';
+        case 'bye':
+          if (id === 'stay') ui.go('intro', now);
           return 'consumed';
         case 'parent':
           if (id === 'save') { call('onSave'); ui.go('intro', now); call('onParentClose'); }

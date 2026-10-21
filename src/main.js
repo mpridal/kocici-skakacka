@@ -7,7 +7,7 @@ import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
 import { createUI, layoutButtons } from './ui.js';
-import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, NAME_BOX, DIM } from './ui-draw.js';
+import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio } from './audio.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
@@ -46,9 +46,20 @@ const ui = createUI(storage, {
   onParentOpen: () => showNameInput(true),
   onParentClose: () => showNameInput(false),
   onSave: () => ui.setName(nameInput.value),
+  onExit: exitApp,
 });
 if (debugBoxes) Object.assign(window, { __game: game, __audio: audio, __ui: ui });
 audio.setMuted(ui.settings.muted);
+
+// ---------- ukončení aplikace ----------
+// Nainstalovanou aplikaci prohlížeč zavřít dovolí; v panelu Chrome ne – pak rozloučení s radou.
+function exitApp() {
+  audio.stopMusic();
+  try { window.close(); } catch { /* nejde */ }
+  setTimeout(() => {
+    if (!document.hidden) ui.showBye(performance.now());
+  }, 400);
+}
 
 // ---------- rodičovské pole pro jméno (HTML input přes canvas) ----------
 function placeNameInput() {
@@ -189,7 +200,7 @@ function draw(now) {
   }
   drawWorld(ctx, world);
   const best = storage.getBest();
-  if (ui.screen === 'intro' || ui.screen === 'parent') {
+  if (ui.screen === 'intro' || ui.screen === 'parent' || ui.screen === 'bye') {
     drawIntro(ctx, ui, best, t);
   } else {
     for (const o of game.obstacles) if (o.active) drawObstacle(ctx, o);
@@ -203,7 +214,7 @@ function draw(now) {
   }
   ctx.restore();
 
-  if (ui.screen === 'paused' || ui.screen === 'over' || ui.screen === 'parent') {
+  if (ui.screen === 'paused' || ui.screen === 'over' || ui.screen === 'parent' || ui.screen === 'bye') {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = DIM;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -211,6 +222,7 @@ function draw(now) {
     if (ui.screen === 'paused') drawPaused(ctx, ui);
     if (ui.screen === 'over') drawOver(ctx, ui, game, best, now);
     if (ui.screen === 'parent') drawParent(ctx, ui);
+    if (ui.screen === 'bye') drawBye(ctx, ui, t);
   }
   drawEffects(ctx, effects);
 }
