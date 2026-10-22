@@ -446,5 +446,5 @@ export function drawRotate(ctx, t) {
   ctx.beginPath();
   ctx.arc(640, 300, 190, -2.4, -1.0);
   ctx.stroke();
-  text(ctx, 'Otoč tablet', 640, 580, 80);
+  text(ctx, 'Otoč displej', 640, 580, 80);
 }

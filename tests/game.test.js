@@ -73,7 +73,7 @@ test('po každých levelEvery bodech hra zrychlí o krok a ohlásí to jednou', 
 
 test('rychlost nepřekročí strop a nad ním už nehlásí další úrovně', () => {
   const g = createGame(noSpawn);
-  runAtScore(g, 1e6, 10); // rozjezd o všechny úrovně najednou trvá déle
+  runAtScore(g, 1e6, 20); // rozjezd o všechny úrovně najednou trvá déle
   assert.equal(g.speed, CONFIG.speed.max);
   let ups = 0;
   for (let k = 1; k < 5; k++) {

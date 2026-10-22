@@ -38,7 +38,7 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 | Nastavení | Co dělá | Výchozí |
 |---|---|---|
 | `speed.start` | počáteční rychlost běhu | 330 |
-| `speed.max` | nejvyšší rychlost (strop) | 560 |
+| `speed.max` | nejvyšší rychlost (strop) | 730 |
 | `speed.levelEvery` | po kolika bodech hra zrychlí (nápis „Rychleji!“) | 200 |
 | `speed.levelStep` | o kolik každá úroveň zrychlí | 30 |
 | `cat.jumpVelocity` | síla odrazu (výška skoku) | 980 |
