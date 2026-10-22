@@ -55,7 +55,8 @@ export function layoutButtons(screen, w = LOGICAL_W) {
   return list;
 }
 
-export const greeting = (name) => (name ? `Ahoj, ${name}!` : '');
+// Kočička pozdraví dítě a představí se.
+export const greeting = (name, catName) => `${name ? `Ahoj, ${name}!` : 'Ahoj!'} Já jsem ${catName}.`;
 export const recordText = (name) => (name ? `Nový rekord, ${name}!` : 'Nový rekord!');
 
 function hit(screen, w, x, y) {

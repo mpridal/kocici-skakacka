@@ -22,8 +22,8 @@ function makeUI() {
 }
 
 test('pozdrav a text rekordu se jménem i bez', () => {
-  assert.equal(greeting('Ema'), 'Ahoj, Ema!');
-  assert.equal(greeting(''), '');
+  assert.equal(greeting('Ema', 'Pusheen'), 'Ahoj, Ema! Já jsem Pusheen.');
+  assert.equal(greeting('', 'Mašlička'), 'Ahoj! Já jsem Mašlička.');
   assert.equal(recordText('Ema'), 'Nový rekord, Ema!');
   assert.equal(recordText(''), 'Nový rekord!');
 });
