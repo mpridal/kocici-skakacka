@@ -5,6 +5,8 @@ import { createUI, layoutButtons, greeting, recordText, SCREENS } from '../src/u
 import { createStorage } from '../src/storage.js';
 
 const center = (b) => [b.x + b.w / 2, b.y + b.h / 2];
+// ťuknutí = stisk a puštění prstu na stejném místě
+const tap = (ui, x, y, now) => { const r = ui.pointerDown(x, y, now); ui.pointerUp(x, y, now); return r; };
 const btn = (screen, id) => layoutButtons(screen).find((b) => b.id === id);
 
 function makeUI() {
@@ -31,34 +33,34 @@ test('pozdrav a text rekordu se jménem i bez', () => {
 test('ťuk na Hraj! spustí hru a chvíli neskáče', () => {
   const { ui, calls } = makeUI();
   assert.equal(ui.screen, 'intro');
-  assert.equal(ui.pointerDown(...center(btn('intro', 'play')), 1000), 'consumed');
+  assert.equal(tap(ui, ...center(btn('intro', 'play')), 1000), 'consumed');
   assert.equal(ui.screen, 'playing');
   assert.deepEqual(calls, ['start']);
-  assert.equal(ui.pointerDown(640, 400, 1200), 'consumed');
-  assert.equal(ui.pointerDown(640, 400, 1300), 'jump');
+  assert.equal(tap(ui, 640, 400, 1200), 'consumed');
+  assert.equal(tap(ui, 640, 400, 1300), 'jump');
 });
 
 test('pauza: tlačítko pauzy neskáče, ťuk mimo tlačítka skáče', () => {
   const { ui, calls } = makeUI();
-  ui.pointerDown(...center(btn('intro', 'play')), 0);
-  assert.equal(ui.pointerDown(640, 400, 1000), 'jump');
-  assert.equal(ui.pointerDown(...center(btn('playing', 'pause')), 2000), 'consumed');
+  tap(ui, ...center(btn('intro', 'play')), 0);
+  assert.equal(tap(ui, 640, 400, 1000), 'jump');
+  assert.equal(tap(ui, ...center(btn('playing', 'pause')), 2000), 'consumed');
   assert.equal(ui.screen, 'paused');
   assert.ok(calls.includes('pause'));
-  assert.equal(ui.pointerDown(...center(btn('paused', 'resume')), 3000), 'consumed');
+  assert.equal(tap(ui, ...center(btn('paused', 'resume')), 3000), 'consumed');
   assert.equal(ui.screen, 'playing');
-  assert.equal(ui.pointerDown(640, 400, 3100), 'consumed', 'hned po pokračování neskáče');
+  assert.equal(tap(ui, 640, 400, 3100), 'consumed', 'hned po pokračování neskáče');
 });
 
 test('konec hry: tlačítka reagují až po prodlevě', () => {
   const { ui, calls } = makeUI();
-  ui.pointerDown(...center(btn('intro', 'play')), 0);
+  tap(ui, ...center(btn('intro', 'play')), 0);
   ui.gameOver(5000, false);
   assert.equal(ui.screen, 'over');
-  ui.pointerDown(...center(btn('over', 'again')), 5000 + CONFIG.ui.gameOverDelay * 1000 - 50);
+  tap(ui, ...center(btn('over', 'again')), 5000 + CONFIG.ui.gameOverDelay * 1000 - 50);
   assert.equal(ui.screen, 'over');
   assert.equal(calls.includes('restart'), false);
-  ui.pointerDown(...center(btn('over', 'again')), 5000 + CONFIG.ui.gameOverDelay * 1000 + 10);
+  tap(ui, ...center(btn('over', 'again')), 5000 + CONFIG.ui.gameOverDelay * 1000 + 10);
   assert.equal(ui.screen, 'playing');
   assert.ok(calls.includes('restart'));
 });
@@ -68,7 +70,7 @@ test('rodičovské nastavení jen po podržení ozubeného kolečka', () => {
   const gear = center(btn('intro', 'gear'));
   ui.pointerDown(...gear, 0);
   ui.update(CONFIG.ui.parentHoldTime * 1000 - 100);
-  ui.pointerUp(CONFIG.ui.parentHoldTime * 1000 - 50);
+  ui.pointerUp(...gear, CONFIG.ui.parentHoldTime * 1000 - 50);
   ui.update(CONFIG.ui.parentHoldTime * 1000 + 500);
   assert.equal(ui.screen, 'intro');
   ui.pointerDown(...gear, 10000);
@@ -80,11 +82,11 @@ test('rodičovské nastavení jen po podržení ozubeného kolečka', () => {
 test('výběr barvy kočky se uloží', () => {
   const storage = createStorage(undefined);
   const ui = createUI(storage, {});
-  ui.pointerDown(...center(btn('intro', 'next')), 0);
+  tap(ui, ...center(btn('intro', 'next')), 0);
   assert.equal(storage.getSettings().skin, CONFIG.skins[1].id);
-  ui.pointerDown(...center(btn('intro', 'skin-4')), 10);
+  tap(ui, ...center(btn('intro', 'skin-4')), 10);
   assert.equal(storage.getSettings().skin, CONFIG.skins[4].id);
-  ui.pointerDown(...center(btn('intro', 'prev')), 20);
+  tap(ui, ...center(btn('intro', 'prev')), 20);
   assert.equal(storage.getSettings().skin, CONFIG.skins[3].id);
 });
 
@@ -133,21 +135,23 @@ test('ťuk na Hraj! funguje i na širokém displeji', () => {
   const { ui } = makeUI();
   ui.setViewWidth(1600);
   const play = layoutButtons('intro', 1600).find((b) => b.id === 'play');
-  assert.equal(ui.pointerDown(...center(play), 0), 'consumed');
+  assert.equal(tap(ui, ...center(play), 0), 'consumed');
   assert.equal(ui.screen, 'playing');
 });
 
-test('ve hře jde vypnout a zapnout zvuk a ťuk na tlačítko neskáče', () => {
+test('zvuk jde vypnout a zapnout v pauze, během hry tlačítko zvuku není', () => {
   const storage = createStorage(undefined);
   const muted = [];
   const ui = createUI(storage, { onMute: (m) => muted.push(m) });
-  ui.pointerDown(...center(btn('intro', 'play')), 0);
-  const sound = btn('playing', 'sound');
-  assert.ok(sound, 've hře je tlačítko zvuku');
-  assert.equal(ui.pointerDown(...center(sound), 1000), 'consumed');
-  assert.equal(ui.screen, 'playing');
+  tap(ui, ...center(btn('intro', 'play')), 0);
+  assert.equal(btn('playing', 'sound'), undefined, 've hře žádné tlačítko zvuku (ťuk tam skáče)');
+  tap(ui, ...center(btn('playing', 'pause')), 500);
+  const sound = btn('paused', 'sound');
+  assert.ok(sound, 'v pauze je tlačítko zvuku');
+  assert.equal(tap(ui, ...center(sound), 1000), 'consumed');
+  assert.equal(ui.screen, 'paused');
   assert.equal(storage.getSettings().muted, true);
-  assert.equal(ui.pointerDown(...center(sound), 2000), 'consumed');
+  assert.equal(tap(ui, ...center(sound), 2000), 'consumed');
   assert.equal(storage.getSettings().muted, false);
   assert.deepEqual(muted, [true, false]);
 });
@@ -159,7 +163,7 @@ test('tlačítko Konec je vedle Hraj! a požádá o zavření aplikace', () => {
   const exit = btn('intro', 'exit');
   assert.ok(exit, 'na úvodu je tlačítko Konec');
   assert.ok(Math.abs(exit.y - play.y) < 1 && exit.x > play.x + play.w, 'Konec je vpravo vedle Hraj!');
-  assert.equal(ui.pointerDown(...center(exit), 0), 'consumed');
+  assert.equal(tap(ui, ...center(exit), 0), 'consumed');
   assert.deepEqual(calls, ['exit']);
 });
 
@@ -167,7 +171,7 @@ test('když se okno nezavře, ukáže se rozloučení a jde se vrátit', () => {
   const { ui } = makeUI();
   ui.showBye(0);
   assert.equal(ui.screen, 'bye');
-  assert.equal(ui.pointerDown(...center(btn('bye', 'stay')), 100), 'consumed');
+  assert.equal(tap(ui, ...center(btn('bye', 'stay')), 100), 'consumed');
   assert.equal(ui.screen, 'intro');
 });
 
@@ -184,16 +188,16 @@ test('Hraj! a Konec jsou stejně velké, v jedné řadě a jako dvojice uprostř
 test('v pauze je tlačítko Konec a po neúspěšném zavření se vrátí do pauzy', () => {
   const calls = [];
   const ui = createUI(createStorage(undefined), { onExit: () => calls.push('exit') });
-  ui.pointerDown(...center(btn('intro', 'play')), 0);
-  ui.pointerDown(...center(btn('playing', 'pause')), 1000);
+  tap(ui, ...center(btn('intro', 'play')), 0);
+  tap(ui, ...center(btn('playing', 'pause')), 1000);
   assert.equal(ui.screen, 'paused');
   const exit = btn('paused', 'exit');
   assert.ok(exit, 'v pauze je Konec');
-  assert.equal(ui.pointerDown(...center(exit), 2000), 'consumed');
+  assert.equal(tap(ui, ...center(exit), 2000), 'consumed');
   assert.deepEqual(calls, ['exit']);
   ui.showBye(2400);
   assert.equal(ui.screen, 'bye');
-  ui.pointerDown(...center(btn('bye', 'stay')), 3000);
+  tap(ui, ...center(btn('bye', 'stay')), 3000);
   assert.equal(ui.screen, 'paused', 'Hrát dál vrátí do rozehrané hry v pauze');
 });
 
@@ -202,4 +206,19 @@ test('kočičky mají svá jména', () => {
   assert.deepEqual(names, {
     mourek: 'Pusheen', zrzka: 'Perníček', cerna: 'Tulísek', bila: 'Sněhulka', pohadkova: 'Mašlička',
   });
+});
+
+test('tlačítko se spustí až po puštění prstu na stejném tlačítku', () => {
+  const calls = [];
+  const ui = createUI(createStorage(undefined), { onExit: () => calls.push('exit'), onStart: () => calls.push('start') });
+  const exit = center(btn('intro', 'exit'));
+  ui.pointerDown(...exit, 0);
+  assert.deepEqual(calls, [], 'samotný dotyk nic nespustí');
+  ui.pointerUp(640, 300, 50); // prst sklouzl pryč z tlačítka
+  assert.deepEqual(calls, [], 'puštění mimo tlačítko nic nespustí');
+  const play = center(btn('intro', 'play'));
+  ui.pointerDown(...play, 100);
+  ui.pointerUp(...play, 150);
+  assert.deepEqual(calls, ['start']);
+  assert.equal(ui.screen, 'playing');
 });

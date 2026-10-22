@@ -23,11 +23,10 @@ const LAYOUT = {
     { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
     { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],
-  playing: [
-    { id: 'sound', x: 1048, y: 16, w: 100, h: 100, a: 'r' },
-    { id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' },
-  ],
+  // ve hře jen pauza – zvuk je v pauze, aby ho ťuk na skok omylem nevypnul
+  playing: [{ id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' }],
   paused: [
+    { id: 'sound', x: 822, y: 168, w: 96, h: 96 },
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
     { id: 'home', x: 390, y: 470, w: 240, h: 104 },
     { id: 'exit', x: 650, y: 470, w: 240, h: 104 },
@@ -139,50 +138,61 @@ export function createUI(storage, cb = {}) {
       return now - ui.overAt >= CONFIG.ui.gameOverDelay * 1000;
     },
 
-    // Vrací 'jump', pokud má ťuk skočit, jinak 'consumed'.
+    // Dotyk: během hry mimo tlačítko = skok ('jump'). Na tlačítku se jen „zmáčkne“
+    // a spustí se až při puštění prstu na stejném tlačítku (pointerUp) – sklouznutí ho zruší.
     pointerDown(x, y, now) {
       const id = hit(ui.screen, ui.viewW, x, y);
       ui.pressed = id;
+      if (ui.screen === 'playing' && !id) {
+        return now < ui.jumpGuardUntil ? 'consumed' : 'jump';
+      }
+      if (ui.screen === 'over' && !ui.overButtonsActive(now)) ui.pressed = null;
+      if (ui.screen === 'intro' && id === 'gear') ui.holdStart = now;
+      return 'consumed';
+    },
+
+    pointerUp(x, y, now) {
+      const id = ui.pressed;
+      ui.pressed = null;
+      ui.holdStart = -1;
+      if (!id || id === 'gear' || hit(ui.screen, ui.viewW, x, y) !== id) return;
+      ui.activate(id, now);
+    },
+
+    activate(id, now) {
       switch (ui.screen) {
         case 'playing':
-          if (id === 'pause') { ui.pause(now); return 'consumed'; }
-          if (id === 'sound') { ui.toggleMute(); return 'consumed'; }
-          return now < ui.jumpGuardUntil ? 'consumed' : 'jump';
+          if (id === 'pause') ui.pause(now);
+          break;
         case 'intro':
           if (id === 'play') { ui.go('playing', now); call('onStart'); }
           else if (id === 'exit') call('onExit');
           else if (id === 'acc') ui.nextAccessory();
           else if (id === 'prev') ui.setSkin(ui.skinIndex - 1);
           else if (id === 'next') ui.setSkin(ui.skinIndex + 1);
-          else if (id && id.startsWith('skin-')) ui.setSkin(Number(id.slice(5)));
+          else if (id.startsWith('skin-')) ui.setSkin(Number(id.slice(5)));
           else if (id === 'sound') ui.toggleMute();
-          else if (id === 'gear') ui.holdStart = now;
-          return 'consumed';
+          break;
         case 'paused':
           if (id === 'resume') { ui.go('playing', now); call('onResume'); }
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
           else if (id === 'exit') call('onExit');
-          return 'consumed';
+          else if (id === 'sound') ui.toggleMute();
+          break;
         case 'over':
-          if (!ui.overButtonsActive(now)) { ui.pressed = null; return 'consumed'; }
+          if (!ui.overButtonsActive(now)) break;
           if (id === 'again') { ui.go('playing', now); call('onRestart'); }
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
-          return 'consumed';
+          break;
         case 'bye':
           if (id === 'stay') ui.go(ui.byeReturn, now);
-          return 'consumed';
+          break;
         case 'parent':
           if (id === 'save') { call('onSave'); ui.go('intro', now); call('onParentClose'); }
           else if (id === 'back') { ui.go('intro', now); call('onParentClose'); }
-          return 'consumed';
+          break;
         default:
-          return 'consumed';
       }
-    },
-
-    pointerUp() {
-      ui.pressed = null;
-      ui.holdStart = -1;
     },
 
     update(now) {

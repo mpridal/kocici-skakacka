@@ -42,7 +42,7 @@ test('tlačítko ozdoby na úvodu přepíná jen mezi odemčenými', () => {
   const ui = createUI(s, {});
   const b = layoutButtons('intro').find((x) => x.id === 'acc');
   assert.ok(b, 'na úvodu je tlačítko ozdoby');
-  const tap = () => ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, 0);
+  const tap = () => { ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, 0); ui.pointerUp(b.x + b.w / 2, b.y + b.h / 2, 0); };
   tap(); assert.equal(s.getSettings().accessory, 'bow');
   tap(); assert.equal(s.getSettings().accessory, 'glasses');
   tap(); assert.equal(s.getSettings().accessory, 'none');

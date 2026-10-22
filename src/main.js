@@ -130,7 +130,7 @@ function keyboardAction(now) {
   if (id) {
     const b = layoutButtons(ui.screen, ui.viewW).find((x) => x.id === id);
     ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, now);
-    ui.pointerUp();
+    ui.pointerUp(b.x + b.w / 2, b.y + b.h / 2, now);
   }
   return false;
 }
@@ -152,8 +152,13 @@ const input = createInput(canvas, (clientX, clientY) => {
   return ui.pointerDown(pt.x, pt.y, now) === 'jump';
 });
 input.attach();
-window.addEventListener('pointerup', () => ui.pointerUp());
-window.addEventListener('pointercancel', () => ui.pointerUp());
+// tlačítka se spouští až při puštění prstu na stejném tlačítku
+const upPt = { x: 0, y: 0 };
+window.addEventListener('pointerup', (e) => {
+  toLogical(vp, e.clientX, e.clientY, upPt);
+  ui.pointerUp(upPt.x, upPt.y, performance.now());
+});
+window.addEventListener('pointercancel', () => ui.pointerUp(-1, -1, performance.now()));
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { ui.pause(performance.now()); audio.stopMusic(); creditCurrentRun(); }
