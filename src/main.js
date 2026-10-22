@@ -339,6 +339,9 @@ function frame(now) {
   } else {
     input.clearPress();
   }
+  // hrací skříňka s mňoukáním jen na úvodní obrazovce
+  if (ui.screen === 'intro' && !vp.portrait && !document.hidden) audio.startIntro();
+  else audio.stopIntro();
   updateEffects(effects, dt);
   const speed = ui.screen === 'playing' ? game.speed : ui.screen === 'intro' ? 40 : 0;
   updateWorld(world, dt, speed, fastDays ? (now / 1000) * 60 : game.score);
