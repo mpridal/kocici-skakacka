@@ -158,3 +158,26 @@ test('dvojice avokád se objevují až od pairFromScore bodů', () => {
   const after = runSpawner(5, CONFIG.speed.start, CONFIG.obstacles.pairFromScore, 2000);
   assert.equal(after.some((o) => o.kind === 'avo-pair'), true);
 });
+
+test('každý herní den jsou překážky hustší, ale pořád přeskočitelné', () => {
+  const day = CONFIG.dayNight.cyclePoints;
+  const speed = CONFIG.speed.start;
+  const need = jumpAirtime(CONFIG.cat.maxHoldTime) + CONFIG.obstacles.reactionTime;
+  const avgGap = (score) => {
+    const list = runSpawner(9, speed, score, 1500);
+    let sum = 0;
+    for (let i = 1; i < list.length; i++) {
+      const gap = (list[i].spawnDistance - (list[i - 1].spawnDistance + list[i - 1].w)) / speed;
+      assert.ok(gap >= need - 1e-9, `den ${Math.floor(score / day)}: mezera ${gap} < ${need}`);
+      sum += gap;
+    }
+    return sum / (list.length - 1);
+  };
+  const d0 = avgGap(10);
+  const d1 = avgGap(day + 10);
+  const d3 = avgGap(3 * day + 10);
+  const d20 = avgGap(20 * day + 10);
+  assert.ok(d1 < d0 - 0.05, `den 1 (${d1}) hustší než den 0 (${d0})`);
+  assert.ok(d3 < d1, `den 3 (${d3}) hustší než den 1 (${d1})`);
+  assert.ok(d20 >= need, 'ani po mnoha dnech nejsou mezery pod minimem');
+});

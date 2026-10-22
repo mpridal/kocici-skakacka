@@ -43,6 +43,8 @@ export const CONFIG = deepFreeze({
     reactionTime: 0.45,   // rezerva na reakci navíc k době skoku
     extraGapMin: 0.2,     // náhodná mezera navíc (v sekundách běhu)
     extraGapMax: 1.2,
+    densityPerDay: 0.25,  // každý herní den (po noci) se náhodná mezera navíc zmenší o 25 %
+    extraGapFloor: 0.05,  // pod tuto náhodnou mezeru navíc už se nejde (povinná rezerva platí vždy)
     pairChance: 0.2,      // šance na dvojici avokád
     pairFromScore: 150,   // dvojice (potřebují vyšší skok) až od tolika bodů
     squirrelFromScore: 300,

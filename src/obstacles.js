@@ -120,7 +120,12 @@ export function createSpawner(rng = Math.random, onGap = null) {
       slot.animTime = 0;
       slot.blinkTimer = randomBlink(rng);
       slot.blinkLeft = 0;
-      const extra = o.extraGapMin + rng() * (o.extraGapMax - o.extraGapMin);
+      // Hustota podle herního dne: zmenšuje se jen náhodná mezera navíc, povinná rezerva zůstává.
+      const day = Math.floor(score / CONFIG.dayNight.cyclePoints);
+      const k = (1 - o.densityPerDay) ** day;
+      const lo = Math.max(o.extraGapFloor, o.extraGapMin * k);
+      const hi = Math.max(lo, o.extraGapMax * k);
+      const extra = lo + rng() * (hi - lo);
       const gapPx = (minGapTime + extra) * speed;
       nextAt = distance + slot.w + gapPx;
       if (onGap) onGap(spawnX + slot.w, gapPx);
