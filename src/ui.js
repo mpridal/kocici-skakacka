@@ -45,13 +45,21 @@ const LAYOUT = {
   ],
 };
 
+// Tlačítka u pravého okraje (a: 'r') mají odstup EDGE od kraje a ustoupí výřezu displeje
+// (kamera, zaoblené rohy) – safe = { r, t } v logických bodech.
+export const EDGE = 20;
+const NO_SAFE = { r: 0, t: 0 };
 const layoutCache = new Map();
-export function layoutButtons(screen, w = LOGICAL_W) {
-  const key = `${screen}@${w}`;
+export function layoutButtons(screen, w = LOGICAL_W, safe = NO_SAFE) {
+  const r = Math.round(safe.r || 0);
+  const t = Math.round(safe.t || 0);
+  const key = `${screen}@${w}@${r}@${t}`;
   let list = layoutCache.get(key);
   if (!list) {
     const dx = (w - LOGICAL_W) / 2;
-    list = (LAYOUT[screen] || []).map((b) => ({ ...b, x: b.x + (b.a === 'r' ? 2 * dx : dx) }));
+    list = (LAYOUT[screen] || []).map((b) => (b.a === 'r'
+      ? { ...b, x: b.x + 2 * dx - EDGE - r, y: b.y + t }
+      : { ...b, x: b.x + dx }));
     layoutCache.set(key, list);
   }
   return list;
@@ -61,8 +69,8 @@ export function layoutButtons(screen, w = LOGICAL_W) {
 export const greeting = (name, catName) => `${name ? `Ahoj, ${name}!` : 'Ahoj!'} Já jsem ${catName}.`;
 export const recordText = (name) => (name ? `Nový rekord, ${name}!` : 'Nový rekord!');
 
-function hit(screen, w, x, y) {
-  for (const b of layoutButtons(screen, w)) {
+function hit(screen, w, safe, x, y) {
+  for (const b of layoutButtons(screen, w, safe)) {
     if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return b.id;
   }
   return null;
@@ -73,6 +81,7 @@ export function createUI(storage, cb = {}) {
   const ui = {
     screen: 'intro',
     viewW: LOGICAL_W,  // logická šířka displeje (nastavuje main.js)
+    safe: { l: 0, r: 0, t: 0 }, // výřez displeje v logických bodech (nastavuje main.js)
     overAt: 0,
     isRecord: false,
     unlocked: null,    // ozdoba odemčená v poslední hře
@@ -112,6 +121,7 @@ export function createUI(storage, cb = {}) {
     },
 
     setViewWidth(w) { ui.viewW = w; },
+    setSafe(l, r, t) { ui.safe = { l, r, t }; },
 
     go(screen, now) {
       ui.screen = screen;
@@ -144,7 +154,7 @@ export function createUI(storage, cb = {}) {
     // Dotyk: během hry mimo tlačítko = skok ('jump'). Na tlačítku se jen „zmáčkne“
     // a spustí se až při puštění prstu na stejném tlačítku (pointerUp) – sklouznutí ho zruší.
     pointerDown(x, y, now) {
-      const id = hit(ui.screen, ui.viewW, x, y);
+      const id = hit(ui.screen, ui.viewW, ui.safe, x, y);
       ui.pressed = id;
       if (ui.screen === 'playing' && !id) {
         return now < ui.jumpGuardUntil ? 'consumed' : 'jump';
@@ -158,7 +168,7 @@ export function createUI(storage, cb = {}) {
       const id = ui.pressed;
       ui.pressed = null;
       ui.holdStart = -1;
-      if (!id || id === 'gear' || hit(ui.screen, ui.viewW, x, y) !== id) return;
+      if (!id || id === 'gear' || hit(ui.screen, ui.viewW, ui.safe, x, y) !== id) return;
       ui.activate(id, now);
     },
 

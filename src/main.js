@@ -128,7 +128,7 @@ function keyboardAction(now) {
   if (ui.screen === 'playing') return ui.pointerDown(-100, -100, now) === 'jump';
   const id = KEY_BUTTON[ui.screen];
   if (id) {
-    const b = layoutButtons(ui.screen, ui.viewW).find((x) => x.id === id);
+    const b = layoutButtons(ui.screen, ui.viewW, ui.safe).find((x) => x.id === id);
     ui.pointerDown(b.x + b.w / 2, b.y + b.h / 2, now);
     ui.pointerUp(b.x + b.w / 2, b.y + b.h / 2, now);
   }
@@ -165,6 +165,16 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---------- velikost ----------
+// Výřez displeje (kamera, zaoblené rohy) z CSS env(safe-area-inset-*), v CSS px.
+const safeProbe = document.createElement('div');
+safeProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
+  'padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+document.body.appendChild(safeProbe);
+function readSafeArea() {
+  const s = getComputedStyle(safeProbe);
+  return { l: parseFloat(s.paddingLeft) || 0, r: parseFloat(s.paddingRight) || 0, t: parseFloat(s.paddingTop) || 0, b: parseFloat(s.paddingBottom) || 0 };
+}
+
 // Zámek na šířku až za běhu a jen když už zařízení na šířku je (nic se tím neotáčí).
 // Vynucená orientace v manifestu zavírala aplikaci spuštěnou na výšku.
 function lockLandscape() {
@@ -177,7 +187,8 @@ function lockLandscape() {
 document.addEventListener('fullscreenchange', lockLandscape);
 
 function resize() {
-  vp = computeViewport(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+  vp = computeViewport(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1, readSafeArea());
+  ui.setSafe(vp.safeL, vp.safeR, vp.safeT);
   game.viewW = vp.logicalW;
   world.w = vp.logicalW;
   ui.setViewWidth(vp.logicalW);

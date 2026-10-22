@@ -229,3 +229,12 @@ test('tlačítko se spustí až po puštění prstu na stejném tlačítku', () 
   assert.deepEqual(calls, ['start']);
   assert.equal(ui.screen, 'playing');
 });
+
+test('tlačítka u pravého okraje mají odstup od kraje a respektují výřez displeje', () => {
+  const plain = layoutButtons('playing', 1600).find((b) => b.id === 'pause');
+  assert.ok(1600 - (plain.x + plain.w) >= 30, 'i bez výřezu je od kraje odstup');
+  const safe = layoutButtons('playing', 1600, { r: 50, t: 0 }).find((b) => b.id === 'pause');
+  assert.ok(1600 - 50 - (safe.x + safe.w) >= 30, 'výřez displeje se přičte');
+  const list = layoutButtons('playing', 1600, { r: 50, t: 0 });
+  for (const b of list) assert.ok(b.x >= 0, `${b.id} na obrazovce`);
+});

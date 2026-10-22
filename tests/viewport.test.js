@@ -58,3 +58,11 @@ test('rozlišení plátna je omezené (šetří výkon slabších telefonů)', (
   assert.equal(vp.canvasW, 1830);
   assert.equal(computeViewport(1280, 800, 1).dpr, 1);
 });
+
+test('výřez kamery / zaoblené rohy se převedou na logické okraje', () => {
+  const vp = computeViewport(2400, 1080, 1, { l: 90, r: 0, t: 0, b: 0 });
+  assert.ok(Math.abs(vp.safeL - 60) < 1e-9, `vlevo ${vp.safeL}`); // 90 css px / měřítko 1,5
+  assert.equal(vp.safeR, 0);
+  const none = computeViewport(1280, 720, 1);
+  assert.equal(none.safeL, 0);
+});

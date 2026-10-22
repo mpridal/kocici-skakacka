@@ -272,7 +272,7 @@ export function drawIntro(ctx, ui, best, t) {
   const blink = t % 3.4 < 0.16;
   drawCat(ctx, cx - 22, 430, 3.2, ui.skin, blink ? 'blink' : 'idle', t, false, ui.settings.accessory);
 
-  for (const b of layoutButtons('intro', ui.viewW)) {
+  for (const b of layoutButtons('intro', ui.viewW, ui.safe)) {
     if (b.id.startsWith('skin-')) {
       const skin = CONFIG.skins[Number(b.id.slice(5))];
       const sel = skin.id === ui.skin.id;
@@ -309,8 +309,9 @@ export function drawIntro(ctx, ui, best, t) {
     }
   }
 
-  iconTrophy(ctx, 70, 66, 70);
-  text(ctx, String(best), 118, 70, 48, { align: 'left' });
+  const L = ui.safe.l; // výřez displeje vlevo
+  iconTrophy(ctx, 70 + L, 66 + ui.safe.t, 70);
+  text(ctx, String(best), 118 + L, 70 + ui.safe.t, 48, { align: 'left' });
 }
 
 // Nápis „Rychleji!“ po zrychlení: krátce vyskočí a zmizí. age = sekundy od zrychlení.
@@ -379,14 +380,16 @@ export function drawHint(ctx, kind, t, cx) {
 
 export function drawHud(ctx, game, ui) {
   prepare(ctx);
+  const L = ui.safe.l; // výřez displeje (kamera, zaoblené rohy)
+  const T = ui.safe.t;
   const shown = Math.max(game.lives, CONFIG.lives.start);
   for (let i = 0; i < shown; i++) {
-    drawHeart(ctx, 52 + i * 62, 56, 2.4, i < game.lives ? '#FF7590' : '#FFFFFF', 1.8);
+    drawHeart(ctx, 52 + L + i * 62, 56 + T, 2.4, i < game.lives ? '#FF7590' : '#FFFFFF', 1.8);
   }
-  drawFish(ctx, 52, 122, 1.6, 0, 0);
-  text(ctx, String(game.fish), 100, 124, 44, { align: 'left' });
-  const buttons = layoutButtons('playing', ui.viewW);
-  text(ctx, String(game.score), buttons[0].x - 24, 66, 64, { align: 'right' });
+  drawFish(ctx, 52 + L, 122 + T, 1.6, 0, 0);
+  text(ctx, String(game.fish), 100 + L, 124 + T, 44, { align: 'left' });
+  const buttons = layoutButtons('playing', ui.viewW, ui.safe);
+  text(ctx, String(game.score), buttons[0].x - 24, 66 + T, 64, { align: 'right' });
   for (const b of buttons) button(ctx, b, ui);
 }
 
