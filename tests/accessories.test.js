@@ -55,3 +55,10 @@ test('konec hry si pamatuje nově odemčenou ozdobu', () => {
   ui.gameOver(5000, false, null);
   assert.equal(ui.unlocked, null);
 });
+
+test('k odměnám přibyla maska, knír a sukýnka a prahy stoupají', () => {
+  const list = CONFIG.accessories;
+  for (const id of ['mask', 'mustache', 'skirt']) assert.ok(list.some((a) => a.id === id), `chybí ${id}`);
+  for (let i = 1; i < list.length; i++) assert.ok(list[i].fish > list[i - 1].fish, 'prahy stoupají');
+  assert.equal(nextUnlock(260).id, 'mask');
+});

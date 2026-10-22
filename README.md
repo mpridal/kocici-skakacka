@@ -55,7 +55,7 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 | `obstacles.pairFromScore` | od kolika bodů chodí dvojice avokád | 150 |
 | `obstacles.densityPerDay` | o kolik se každý herní den (po noci) zhustí překážky – povinná mezera na skok zůstává | 25 % |
 | `tutorial.untilScore` | nápověda „Ťukni / Podrž prst“, dokud dítě jednou nedosáhne tolika bodů | 150 |
-| `accessories` | ozdoby kočičky a kolik rybiček celkem je k nim potřeba | 30 / 80 / 150 / 250 |
+| `accessories` | ozdoby kočičky a kolik rybiček celkem je k nim potřeba | mašle 30, brýle 80, kytička 150, korunka 250, maska 350, knír 450, sukýnka 600 |
 
 Po úpravě spusťte testy (`npm test`), které hlídají, že hra zůstane férová (vždy dost místa na skok).
 

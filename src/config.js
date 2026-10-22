@@ -78,6 +78,9 @@ export const CONFIG = deepFreeze({
     { id: 'glasses', label: 'Brýle', fish: 80 },
     { id: 'flower', label: 'Kytička', fish: 150 },
     { id: 'crown', label: 'Korunka', fish: 250 },
+    { id: 'mask', label: 'Maska', fish: 350 },
+    { id: 'mustache', label: 'Knír', fish: 450 },
+    { id: 'skirt', label: 'Sukýnka', fish: 600 },
   ],
 
   skins: [

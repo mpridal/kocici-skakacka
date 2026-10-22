@@ -19,7 +19,7 @@ function legPath(x) {
 const LEG_PATHS = LEGS.map(legPath);
 
 // Ozdoba v souřadnicích kočky (sedí na hlavě / obličeji).
-export function drawAccessory(ctx, id) {
+export function drawAccessory(ctx, id, eye = '#3A3238') {
   if (!id || id === 'none') return;
   ctx.lineWidth = 1.8;
   ctx.strokeStyle = OUTLINE;
@@ -41,6 +41,66 @@ export function drawAccessory(ctx, id) {
       ellipse(ctx, 26 + Math.cos(a) * 3.6, -57 + Math.sin(a) * 3.6, 2.8, 2.8, '#FFB3C7', 1.2);
     }
     ellipse(ctx, 26, -57, 2.2, 2.2, '#FFD45E', 1.2);
+  } else if (id === 'mask') {
+    // maska superhrdiny s otvory pro oči a mašlí vzadu
+    ctx.fillStyle = '#5DA9E9';
+    ctx.beginPath();
+    ctx.moveTo(32, -38);
+    ctx.bezierCurveTo(32, -45, 44, -44, 46, -41);
+    ctx.bezierCurveTo(48, -44, 60, -45, 60, -38);
+    ctx.bezierCurveTo(60, -32, 50, -31, 46, -34);
+    ctx.bezierCurveTo(42, -31, 32, -32, 32, -38);
+    ctx.closePath();
+    ctx.moveTo(43.4, -37); ctx.ellipse(40, -37, 3.4, 3.6, 0, 0, Math.PI * 2);
+    ctx.moveTo(55.4, -37.5); ctx.ellipse(52, -37.5, 3.4, 3.6, 0, 0, Math.PI * 2);
+    ctx.fill('evenodd');
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(32, -38); ctx.lineTo(25, -42); ctx.moveTo(32, -37); ctx.lineTo(26, -33);
+    ctx.strokeStyle = '#5DA9E9';
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+  } else if (id === 'mustache') {
+    // knír nad pusinkou, barvou jako oči (na černé kočce světlý)
+    ctx.fillStyle = eye;
+    ctx.beginPath();
+    ctx.moveTo(46, -31);
+    ctx.bezierCurveTo(43, -33.5, 38, -33, 36, -29);
+    ctx.bezierCurveTo(39, -30.5, 42.5, -28.8, 46, -29.8);
+    ctx.bezierCurveTo(49.5, -28.8, 53, -30.5, 56, -29);
+    ctx.bezierCurveTo(54, -33, 49, -33.5, 46, -31);
+    ctx.closePath();
+    ctx.fill();
+  } else if (id === 'skirt') {
+    // načechraná růžová sukýnka (tutu): nahoře pásek, dole se rozšiřuje přes obrys těla
+    ctx.fillStyle = '#FFB3C7';
+    ctx.beginPath();
+    ctx.moveTo(-22, -22);
+    ctx.lineTo(32, -22);
+    ctx.lineTo(44, -7);
+    const n = 8;
+    const step = (44 + 34) / n;
+    for (let i = 0; i < n; i++) {
+      const x0 = 44 - i * step;
+      ctx.quadraticCurveTo(x0 - step / 2, 3, x0 - step, -7);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = '#FF9AB0';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    for (let i = 1; i < n; i++) {
+      const x = 44 - i * step;
+      ctx.moveTo(x, -7);
+      ctx.lineTo(x * 0.72 + 4, -20);
+    }
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-22, -22); ctx.lineTo(32, -22);
+    ctx.strokeStyle = '#FF7590';
+    ctx.lineWidth = 3.4;
+    ctx.stroke();
   } else if (id === 'crown') {
     ctx.fillStyle = '#FFD45E';
     ctx.beginPath();
@@ -54,7 +114,10 @@ export function drawAccessory(ctx, id) {
 // Ikona ozdoby samostatně (tlačítko na úvodu); size = přibližná velikost v px.
 export function drawAccessoryIcon(ctx, id, cx, cy, size) {
   // [střed x, střed y, šířka] ozdoby v souřadnicích kočky
-  const box = { bow: [48, -61, 15], glasses: [43, -38.5, 30], flower: [26, -57, 13], crown: [40, -62.5, 19] };
+  const box = {
+    bow: [48, -61, 15], glasses: [43, -38.5, 30], flower: [26, -57, 13], crown: [40, -62.5, 19],
+    mask: [44, -38, 36], mustache: [46, -31, 23], skirt: [5, -10, 82],
+  };
   const c = box[id];
   if (!c) return;
   ctx.save();
@@ -112,7 +175,7 @@ export function drawCat(ctx, x, groundY, scale, skin, pose, t, blinking = false,
     }
     strokePath(ctx, MOUTH, skin.eye, 1.4);
   }
-  drawAccessory(ctx, accessory);
+  drawAccessory(ctx, accessory, skin.eye);
   ctx.restore();
 }
 
