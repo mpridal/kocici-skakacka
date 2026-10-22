@@ -2,6 +2,7 @@
 import { CONFIG, LOGICAL_W } from './config.js';
 import { jumpAirtime } from './cat.js';
 import { shrinkBox } from './collision.js';
+import { dayPhase, phaseName } from './daynight.js';
 
 // Obrysy kreseb v jednotkách vzoru.
 export const AVO_ART = { left: -30, right: 30, top: -56 };
@@ -15,7 +16,7 @@ const DESPAWN_X = -200;
 
 function blankObstacle() {
   return {
-    active: false, kind: 'avo-small', lane: null, x: 0, w: 0, h: 0, bottom: 0,
+    active: false, kind: 'avo-small', lane: null, look: 'squirrel', x: 0, w: 0, h: 0, bottom: 0,
     spawnDistance: 0, blinkTimer: 0, blinkLeft: 0, animTime: 0,
   };
 }
@@ -118,6 +119,8 @@ export function createSpawner(rng = Math.random, onGap = null) {
       slot.x = spawnX;
       slot.spawnDistance = distance;
       slot.animTime = 0;
+      // v noci létá místo veverky netopýr (stejná dráha i kolize, jen jiný vzhled)
+      slot.look = phaseName(dayPhase(score)) === 'night' ? 'bat' : 'squirrel';
       slot.blinkTimer = randomBlink(rng);
       slot.blinkLeft = 0;
       // Hustota podle herního dne: zmenšuje se jen náhodná mezera navíc, povinná rezerva zůstává.

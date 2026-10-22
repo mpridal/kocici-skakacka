@@ -51,6 +51,7 @@ export const CONFIG = deepFreeze({
     squirrelChance: 0.3,
     avocadoScale: 1.3,    // velikost kresby avokáda
     squirrelScale: 1.1,   // velikost kresby veverky
+    batScale: 0.75,       // velikost kresby netopýra (v noci místo veverky)
     hitboxShrink: 0.25,
   },
 

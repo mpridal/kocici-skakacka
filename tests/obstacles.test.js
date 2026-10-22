@@ -181,3 +181,14 @@ test('každý herní den jsou překážky hustší, ale pořád přeskočitelné
   assert.ok(d3 < d1, `den 3 (${d3}) hustší než den 1 (${d1})`);
   assert.ok(d20 >= need, 'ani po mnoha dnech nejsou mezery pod minimem');
 });
+
+test('v noci se místo veverky objevuje netopýr (stejná překážka), ve dne veverka', () => {
+  const cycle = CONFIG.dayNight.cyclePoints;
+  const nightScore = cycle + Math.round(cycle * 0.72); // noc druhého dne (veverky už létají)
+  const dayScore = cycle + Math.round(cycle * 0.1);
+  const night = runSpawner(4, CONFIG.speed.start, nightScore, 800).filter((o) => o.kind === 'squirrel');
+  const day = runSpawner(4, CONFIG.speed.start, dayScore, 800).filter((o) => o.kind === 'squirrel');
+  assert.ok(night.length > 0 && day.length > 0);
+  assert.ok(night.every((o) => o.look === 'bat'), 'v noci netopýři');
+  assert.ok(day.every((o) => o.look === 'squirrel'), 've dne veverky');
+});

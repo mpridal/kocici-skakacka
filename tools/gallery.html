@@ -12,6 +12,7 @@ import { CONFIG } from '../src/config.js';
 import { drawCat } from '../src/art/cat.js';
 import { drawAvocado } from '../src/art/avocado.js';
 import { drawSquirrel } from '../src/art/squirrel.js';
+import { drawBat } from '../src/art/bat.js';
 import { drawFish } from '../src/art/fish.js';
 import { drawHeart } from '../src/art/heart.js';
 
@@ -28,6 +29,8 @@ function frame(now) {
   drawAvocado(ctx, 240, 520, 1.3, Math.floor(t * 1.3) % 4 === 0);
   drawSquirrel(ctx, 450, 470, 1.1, t);
   drawSquirrel(ctx, 600, 470, 2.5, t);
+  drawBat(ctx, 450, 620, 0.75, t);
+  drawBat(ctx, 650, 620, 1.5, t);
   drawFish(ctx, 800, 470, 1.5, t, 0);
   drawFish(ctx, 900, 470, 3, t, 0.16);
   drawHeart(ctx, 1050, 470, 2.5, '#FF8FA5');

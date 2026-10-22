@@ -3,6 +3,7 @@ import { CONFIG } from '../config.js';
 import { AVO_ART, SQUIRREL_ART, PAIR_SMALL, PAIR_GAP, eyesClosed } from '../obstacles.js';
 import { drawAvocado } from './avocado.js';
 import { drawSquirrel } from './squirrel.js';
+import { drawBat } from './bat.js';
 import { drawCat } from './cat.js';
 import { drawFish } from './fish.js';
 import { drawHeart } from './heart.js';
@@ -24,6 +25,11 @@ export function drawObstacle(ctx, o) {
   if (o.kind === 'squirrel') {
     const s = CONFIG.obstacles.squirrelScale;
     groundShadow(ctx, o.x + o.w / 2, o.bottom, o.w * 0.8);
+    if (o.look === 'bat') {
+      // netopýr podobně velký jako veverka, střed na středu kolizního boxu
+      drawBat(ctx, o.x + o.w / 2, g - o.bottom - o.h / 2, CONFIG.obstacles.batScale, o.animTime);
+      return;
+    }
     drawSquirrel(ctx, o.x - SQUIRREL_ART.left * s, g - o.bottom - SQUIRREL_ART.bottom * s, s, o.animTime);
     return;
   }

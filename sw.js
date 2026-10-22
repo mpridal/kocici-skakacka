@@ -11,6 +11,7 @@ const PRECACHE = [
   'icons/icon-maskable-512.png',
   'src/accessories.js',
   'src/art/avocado.js',
+  'src/art/bat.js',
   'src/art/cat.js',
   'src/art/effects.js',
   'src/art/fish.js',
