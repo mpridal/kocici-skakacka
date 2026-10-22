@@ -184,7 +184,11 @@ function resize() {
   lockLandscape();
   canvas.width = vp.canvasW;
   canvas.height = vp.canvasH;
-  if (nameInput.style.display === 'block') placeNameInput();
+  // rodičovské pole pro jméno: na výšku schovat (ukazuje se výzva k otočení), na šířku vrátit
+  if (ui.screen === 'parent') {
+    nameInput.style.display = vp.portrait ? 'none' : 'block';
+    if (!vp.portrait) placeNameInput();
+  }
   if (vp.portrait) ui.pause(performance.now());
   draw(performance.now());
 }
