@@ -11,7 +11,7 @@ import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawL
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
 import { hintFor, tutorialActive } from './tutorial.js';
-import { newlyUnlocked } from './accessories.js';
+import { creditRun } from './progress.js';
 import { startAutoUpdate } from './update.js';
 import { vibrateFor } from './haptics.js';
 import { hitFeedback } from './feedback.js';
@@ -48,7 +48,7 @@ const ui = createUI(storage, {
   onRestart: startRun,
   onResume: () => audio.startMusic(),
   onPause: () => audio.stopMusic(),
-  onHome: () => { audio.stopMusic(); resetGame(game); clearEffects(effects); },
+  onHome: () => { audio.stopMusic(); creditCurrentRun(); resetGame(game); clearEffects(effects); },
   onMute: (m) => audio.setMuted(m),
   onParentOpen: () => showNameInput(true),
   onParentClose: () => showNameInput(false),
@@ -58,10 +58,19 @@ const ui = createUI(storage, {
 if (debugBoxes) Object.assign(window, { __game: game, __audio: audio, __ui: ui });
 audio.setMuted(ui.settings.muted);
 
+// Rozehranou hru připsat (rybičky, rekord), když ji hráč opustí bez prohry.
+// Každá hra se připíše jen jednou; pokračování po návratu se pak už nepřipočítá znovu.
+function creditCurrentRun() {
+  if (game.distance <= 0) return;
+  creditRun(game, storage);
+  ui.settings = storage.getSettings();
+}
+
 // ---------- ukončení aplikace ----------
 // Nainstalovanou aplikaci prohlížeč zavřít dovolí; v panelu Chrome ne – pak rozloučení s radou.
 function exitApp() {
   audio.stopMusic();
+  creditCurrentRun();
   try { window.close(); } catch { /* nejde */ }
   setTimeout(() => {
     if (!document.hidden) ui.showBye(performance.now());
@@ -147,7 +156,7 @@ window.addEventListener('pointerup', () => ui.pointerUp());
 window.addEventListener('pointercancel', () => ui.pointerUp());
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { ui.pause(performance.now()); audio.stopMusic(); }
+  if (document.hidden) { ui.pause(performance.now()); audio.stopMusic(); creditCurrentRun(); }
 });
 
 // ---------- velikost ----------
@@ -279,12 +288,8 @@ function handleEvents(now) {
     }
     if (e === 'over') {
       audio.stopMusic();
-      const record = game.score > storage.getBest();
-      storage.setBest(game.score);
-      const before = ui.settings.totalFish;
-      storage.saveSettings({ totalFish: before + game.fish });
+      const { record, unlocked } = creditRun(game, storage);
       ui.settings = storage.getSettings();
-      const unlocked = newlyUnlocked(before, ui.settings.totalFish);
       ui.gameOver(now, record, unlocked);
       if (unlocked) audio.play('heart');
       if (record) {

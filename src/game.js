@@ -34,6 +34,8 @@ export function createGame(rng = Math.random) {
 
 export function resetGame(game) {
   game.status = 'playing';
+  game.creditedFish = 0;  // kolik rybiček z této hry už je připsáno (src/progress.js)
+  game.bestBefore = null; // rekord ze začátku hry
   game.score = 0;
   game.distance = 0;
   game.fish = 0;

@@ -31,6 +31,7 @@ const PRECACHE = [
   'src/main.js',
   'src/obstacles.js',
   'src/pickups.js',
+  'src/progress.js',
   'src/storage.js',
   'src/tutorial.js',
   'src/update.js',
