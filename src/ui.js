@@ -29,7 +29,6 @@ const LAYOUT = {
     { id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' },
   ],
   paused: [
-    { id: 'sound', x: 822, y: 168, w: 96, h: 96 },
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
     { id: 'home', x: 390, y: 470, w: 240, h: 104 },
     { id: 'exit', x: 650, y: 470, w: 240, h: 104 },
@@ -191,7 +190,6 @@ export function createUI(storage, cb = {}) {
           if (id === 'resume') { ui.go('playing', now); call('onResume'); }
           else if (id === 'home') { ui.go('intro', now); call('onHome'); }
           else if (id === 'exit') call('onExit');
-          else if (id === 'sound') ui.toggleMute();
           break;
         case 'over':
           if (!ui.overButtonsActive(now)) break;
