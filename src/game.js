@@ -26,7 +26,8 @@ export function createGame(rng = Math.random) {
     rng,
     events: [],
   };
-  game.spawner = createSpawner(rng, (x, gap) => placePickups(game.pickups, x, gap, rng));
+  game.spawner = createSpawner(rng, (x, gap) =>
+    placePickups(game.pickups, x, gap, rng, game.lives < CONFIG.lives.max));
   resetGame(game);
   return game;
 }

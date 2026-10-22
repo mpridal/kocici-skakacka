@@ -25,10 +25,11 @@ function spawn(pool, kind, x, y, phase) {
 }
 
 // Mezera mezi překážkami začíná na `startX` (obrazovka) a je široká `gapPx`.
-export function placePickups(pool, startX, gapPx, rng) {
+// allowHeart = false, když má hráč plné životy (srdíčka se pak neposílají).
+export function placePickups(pool, startX, gapPx, rng, allowHeart = true) {
   const cx = startX + gapPx / 2;
   const c = CONFIG.pickups;
-  if (rng() < c.heartChance) {
+  if (rng() < c.heartChance && allowHeart) {
     spawn(pool, 'heart', cx, HEART_HEIGHT, 0);
     return;
   }

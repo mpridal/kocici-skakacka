@@ -59,7 +59,7 @@ test('bonusy jsou dosažitelné skokem a nikdy nejsou v překážce', () => {
   let heartSeen = 0;
   for (let seed = 1; seed <= 10; seed++) {
     const g = createGame(seeded(seed));
-    g.lives = 1e9; // ať hra neskončí
+    g.lives = 2; // (invuln níže drží hráče naživu; méně než max, aby chodila i srdíčka)
     const pb = {};
     const ob = {};
     for (let i = 0; i < 60 * 300; i++) {
@@ -81,4 +81,25 @@ test('bonusy jsou dosažitelné skokem a nikdy nejsou v překážce', () => {
   }
   assert.ok(fishSeen > 50, `rybiček ${fishSeen}`);
   assert.ok(heartSeen > 0, 'aspoň jedno srdíčko');
+});
+
+test('při plných 5 životech se srdíčka nepošlou, při méně ano', () => {
+  const countHearts = (lives) => {
+    let hearts = 0;
+    for (let seed = 1; seed <= 6; seed++) {
+      const g = createGame(seeded(seed));
+      for (let i = 0; i < 60 * 300; i++) {
+        g.lives = lives;
+        g.invuln = 10;
+        stepGame(g, dt, false, false);
+        for (const p of g.pickups) {
+          if (p.active && p.kind === 'heart' && !p._seen) { p._seen = true; hearts++; }
+        }
+        for (const p of g.pickups) if (!p.active) p._seen = false;
+      }
+    }
+    return hearts;
+  };
+  assert.equal(countHearts(CONFIG.lives.max), 0);
+  assert.ok(countHearts(CONFIG.lives.max - 1) > 0);
 });
