@@ -23,6 +23,7 @@ const PRECACHE = [
   'src/collision.js',
   'src/config.js',
   'src/daynight.js',
+  'src/feedback.js',
   'src/game.js',
   'src/haptics.js',
   'src/input.js',

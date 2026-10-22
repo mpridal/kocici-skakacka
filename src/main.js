@@ -14,6 +14,7 @@ import { hintFor } from './tutorial.js';
 import { newlyUnlocked } from './accessories.js';
 import { startAutoUpdate } from './update.js';
 import { vibrateFor } from './haptics.js';
+import { hitFeedback } from './feedback.js';
 import { createWorld, updateWorld, drawWorld } from './world.js';
 import { createEffects, spawnSparkles, spawnConfetti, updateEffects, drawEffects, clearEffects } from './art/effects.js';
 
@@ -35,6 +36,7 @@ const audio = createAudio();
 
 const startRun = () => {
   resetGame(game);
+  hitAt = -1e9;
   audio.setTempo(1);
   levelUpAt = -1e9;
   clearEffects(effects);
@@ -212,6 +214,8 @@ function draw(now) {
     drawRotate(ctx, t);
     return;
   }
+  hitFeedback(ui.screen === 'playing' ? (now - hitAt) / 1000 : -1, fx);
+  ctx.translate(fx.dx, fx.dy);
   drawWorld(ctx, world);
   const best = storage.getBest();
   const onIntro = ui.screen === 'intro' || ui.screen === 'parent' || (ui.screen === 'bye' && ui.byeReturn === 'intro');
@@ -229,6 +233,7 @@ function draw(now) {
     }
   }
   ctx.restore();
+  if (fx.flash > 0) drawHitFlash(fx.flash);
 
   if (ui.screen === 'paused' || ui.screen === 'over' || ui.screen === 'parent' || ui.screen === 'bye') {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -243,13 +248,30 @@ function draw(now) {
   drawEffects(ctx, effects);
 }
 
+// Zčervenání okrajů obrazovky při zásahu (přes celé plátno).
+function drawHitFlash(alpha) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const w = canvas.width;
+  const h = canvas.height;
+  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.hypot(w, h) / 2);
+  g.addColorStop(0, 'rgba(255,90,119,0)');
+  g.addColorStop(1, `rgba(255,90,119,${alpha})`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+}
+
 // ---------- smyčka ----------
 let levelUpAt = -1e9;
+let hitAt = -1e9;
+const fx = { dx: 0, dy: 0, flash: 0 };
 function handleEvents(now) {
   for (const e of game.events) {
     if (e === 'levelUp') { levelUpAt = now; audio.play('levelUp'); }
     if (e === 'jump' || e === 'fish' || e === 'hit') audio.play(e);
     if (e === 'hit' || e === 'over') vibrateFor(e);
+    if (e === 'hit') hitAt = now;
     if (e === 'fish') spawnSparkles(effects, game.pickupAt.x, game.pickupAt.y);
     if (e === 'heart' || e === 'heartBonus') {
       audio.play('heart');
