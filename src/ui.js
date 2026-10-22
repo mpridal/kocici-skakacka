@@ -23,8 +23,11 @@ const LAYOUT = {
     { id: 'sound', x: 1160, y: 24, w: 96, h: 96, a: 'r' },
     { id: 'gear', x: 1160, y: 600, w: 96, h: 96, a: 'r' },
   ],
-  // ve hře jen pauza – zvuk je v pauze, aby ho ťuk na skok omylem nevypnul
-  playing: [{ id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' }],
+  // ve hře zvuk a pauza (spustí se až po puštění prstu, takže ťuk na skok je nepřepne)
+  playing: [
+    { id: 'sound', x: 1048, y: 16, w: 100, h: 100, a: 'r' },
+    { id: 'pause', x: 1164, y: 16, w: 100, h: 100, a: 'r' },
+  ],
   paused: [
     { id: 'sound', x: 822, y: 168, w: 96, h: 96 },
     { id: 'resume', x: 390, y: 320, w: 500, h: 116 },
@@ -163,6 +166,7 @@ export function createUI(storage, cb = {}) {
       switch (ui.screen) {
         case 'playing':
           if (id === 'pause') ui.pause(now);
+          else if (id === 'sound') ui.toggleMute();
           break;
         case 'intro':
           if (id === 'play') { ui.go('playing', now); call('onStart'); }

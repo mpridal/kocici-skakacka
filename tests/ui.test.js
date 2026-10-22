@@ -139,12 +139,19 @@ test('ťuk na Hraj! funguje i na širokém displeji', () => {
   assert.equal(ui.screen, 'playing');
 });
 
-test('zvuk jde vypnout a zapnout v pauze, během hry tlačítko zvuku není', () => {
+test('zvuk jde vypnout a zapnout ve hře i v pauze, ťuk na tlačítko neskáče', () => {
   const storage = createStorage(undefined);
   const muted = [];
   const ui = createUI(storage, { onMute: (m) => muted.push(m) });
   tap(ui, ...center(btn('intro', 'play')), 0);
-  assert.equal(btn('playing', 'sound'), undefined, 've hře žádné tlačítko zvuku (ťuk tam skáče)');
+  const hud = btn('playing', 'sound');
+  assert.ok(hud, 've hře je tlačítko zvuku');
+  assert.equal(tap(ui, ...center(hud), 400), 'consumed', 'ťuk na zvuk neskáče');
+  assert.equal(storage.getSettings().muted, true);
+  assert.equal(ui.screen, 'playing');
+  tap(ui, ...center(hud), 450);
+  assert.equal(storage.getSettings().muted, false);
+  muted.length = 0;
   tap(ui, ...center(btn('playing', 'pause')), 500);
   const sound = btn('paused', 'sound');
   assert.ok(sound, 'v pauze je tlačítko zvuku');
