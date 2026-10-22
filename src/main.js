@@ -10,7 +10,7 @@ import { createUI, layoutButtons } from './ui.js';
 import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawHint, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
-import { hintFor, tutorialActive } from './tutorial.js';
+import { hintFor, tutorialActive, runHintActive } from './tutorial.js';
 import { creditRun } from './progress.js';
 import { startAutoUpdate } from './update.js';
 import { vibrateFor } from './haptics.js';
@@ -243,7 +243,9 @@ function draw(now) {
     if (ui.screen === 'playing') {
       drawHud(ctx, game, ui);
       drawLevelUp(ctx, (now - levelUpAt) / 1000, vp.logicalW / 2);
-      if (tutorialActive(game.score, ui.settings.tutorialDone)) drawHint(ctx, hintFor(game), t, vp.logicalW / 2);
+      const hint = hintFor(game);
+      const showHint = hint === 'run' ? runHintActive(ui.settings) : tutorialActive(game.score, ui.settings.tutorialDone);
+      if (showHint) drawHint(ctx, hint, t, vp.logicalW / 2);
     }
   }
   ctx.restore();
@@ -283,6 +285,10 @@ const fx = { dx: 0, dy: 0, flash: 0 };
 function handleEvents(now) {
   for (const e of game.events) {
     if (e === 'levelUp') { levelUpAt = now; audio.play('levelUp'); }
+    if (e === 'passedHigh' && ui.settings.runHints > 0) {
+      storage.saveSettings({ runHints: ui.settings.runHints - 1 }); // „Běž dál!“ jen prvních pár setkání
+      ui.settings = storage.getSettings();
+    }
     if (e === 'jump' || e === 'fish' || e === 'hit') audio.play(e);
     if (e === 'hit' || e === 'over') vibrateFor(e);
     if (e === 'hit') hitAt = now;

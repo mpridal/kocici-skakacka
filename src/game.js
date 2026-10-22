@@ -110,6 +110,14 @@ export function stepGame(game, rawDt, held, pressed) {
   collectPickups(game);
   updateScore(game);
 
+  // vysoká veverka/netopýr přeletěl nad kočkou → pro nápovědu „Běž dál!“
+  for (const o of game.obstacles) {
+    if (o.active && !o.passed && o.lane === 'high' && o.x + o.w < CONFIG.cat.x) {
+      o.passed = true;
+      game.events.push('passedHigh');
+    }
+  }
+
   if (game.invuln > 0) {
     game.invuln = Math.max(0, game.invuln - dt);
     return;

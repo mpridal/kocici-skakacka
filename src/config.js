@@ -57,6 +57,7 @@ export const CONFIG = deepFreeze({
     pairFromScore: 150,   // dvojice (potřebují vyšší skok) až od tolika bodů
     squirrelFromScore: 300,
     squirrelChance: 0.3,
+    highLaneFromScore: 600, // vysoká dráha (pod veverkou se proběhne) až od tolika bodů
     avocadoScale: 1.3,    // velikost kresby avokáda
     squirrelScale: 1.1,   // velikost kresby veverky
     batScale: 0.75,       // velikost kresby netopýra (v noci místo veverky)
@@ -75,7 +76,7 @@ export const CONFIG = deepFreeze({
 
   dayNight: { cyclePoints: 700 },
 
-  tutorial: { untilScore: 150 }, // nápověda ťukni/podrž, dokud hráč jednou nedosáhne tolika bodů
+  tutorial: { untilScore: 150, runHints: 3 }, // runHints = kolikrát ukázat „Běž dál!“ u vysoké veverky // nápověda ťukni/podrž, dokud hráč jednou nedosáhne tolika bodů
 
   ui: { gameOverDelay: 1, parentHoldTime: 2, nameMaxLength: 12 },
 

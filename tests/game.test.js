@@ -130,3 +130,20 @@ test('resetGame vrátí hru na začátek', () => {
   assert.equal(g.score, 0);
   assert.equal(g.obstacles.some((o) => o.active), false);
 });
+
+test('vysoká veverka, která proletí nad kočkou, se ohlásí jednou (pro nápovědu Běž dál!)', async () => {
+  const { makeObstacle } = await import('../src/obstacles.js');
+  const g = createGame(noSpawn);
+  clearObstacles(g);
+  const o = g.obstacles[0];
+  makeObstacle('squirrel', 'high', o);
+  o.active = true;
+  o.x = CONFIG.cat.x + 40;
+  let passed = 0;
+  for (let i = 0; i < 120; i++) {
+    for (const q of g.obstacles) if (q !== o) q.active = false;
+    stepGame(g, dt, false, false);
+    passed += g.events.filter((e) => e === 'passedHigh').length;
+  }
+  assert.equal(passed, 1);
+});

@@ -52,8 +52,9 @@ test('veverky až od daného skóre', () => {
   assert.equal(before.some((o) => o.kind === 'squirrel'), false);
   const after = runSpawner(3, CONFIG.speed.start, CONFIG.obstacles.squirrelFromScore, 2000);
   assert.equal(after.some((o) => o.kind === 'squirrel'), true);
+  const all = runSpawner(3, CONFIG.speed.start, CONFIG.obstacles.highLaneFromScore, 2000);
   for (const lane of ['low', 'mid', 'high']) {
-    assert.ok(after.some((o) => o.lane === lane), `chybí dráha ${lane}`);
+    assert.ok(all.some((o) => o.lane === lane), `chybí dráha ${lane}`);
   }
 });
 
@@ -191,4 +192,12 @@ test('v noci se místo veverky objevuje netopýr (stejná překážka), ve dne v
   assert.ok(night.length > 0 && day.length > 0);
   assert.ok(night.every((o) => o.look === 'bat'), 'v noci netopýři');
   assert.ok(day.every((o) => o.look === 'squirrel'), 've dne veverky');
+});
+
+test('vysoká dráha (podběhnout) přijde až od highLaneFromScore bodů', () => {
+  const lanes = (score) => new Set(runSpawner(6, CONFIG.speed.start, score, 1500).filter((x) => x.kind === 'squirrel').map((x) => x.lane));
+  const early = lanes(CONFIG.obstacles.squirrelFromScore);
+  assert.equal(early.has('high'), false, 'zpočátku jen nízká a střední');
+  assert.ok(early.has('low') && early.has('mid'));
+  assert.equal(lanes(CONFIG.obstacles.highLaneFromScore).has('high'), true);
 });

@@ -12,11 +12,16 @@ export function hintFor(game) {
     if (!nearest || o.x < nearest.x) nearest = o;
   }
   if (!nearest || nearest.x - front > game.speed * LEAD_TIME) return null;
-  if (nearest.kind === 'squirrel' && nearest.lane === 'high') return null;
+  if (nearest.kind === 'squirrel' && nearest.lane === 'high') return 'run';
   return nearest.kind === 'avo-pair' || (nearest.kind === 'squirrel' && nearest.lane === 'mid') ? 'hold' : 'tap';
 }
 
 // Nápověda běží jen do prvního dosažení limitu – hned na něm zmizí (i uprostřed hry).
 export function tutorialActive(score, done) {
   return !done && score < CONFIG.tutorial.untilScore;
+}
+
+// „Běž dál!“ u vysoké veverky se ukáže jen prvních pár setkání (počítá se v úložišti).
+export function runHintActive(settings) {
+  return settings.runHints > 0;
 }

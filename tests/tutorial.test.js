@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.js';
 import { createGame } from '../src/game.js';
 import { makeObstacle } from '../src/obstacles.js';
-import { hintFor, tutorialActive } from '../src/tutorial.js';
+import { hintFor, tutorialActive, runHintActive } from '../src/tutorial.js';
 import { createStorage } from '../src/storage.js';
 
 function gameWith(kind, lane, distanceAhead) {
@@ -25,8 +25,8 @@ test('před dvojicí a střední veverkou radí podržet', () => {
   assert.equal(hintFor(gameWith('squirrel', 'mid', 250)), 'hold');
 });
 
-test('pod vysokou veverkou nic neradí (proběhne se)', () => {
-  assert.equal(hintFor(gameWith('squirrel', 'high', 250)), null);
+test('pod vysokou veverkou radí běžet dál (neskákat)', () => {
+  assert.equal(hintFor(gameWith('squirrel', 'high', 250)), 'run');
 });
 
 test('daleko před překážkou ani za ní nic neradí, ve vzduchu taky ne', () => {
@@ -50,4 +50,9 @@ test('nápověda zmizí hned po dosažení limitu, ne až v další hře', () =>
   assert.equal(tutorialActive(limit - 1, false), true);
   assert.equal(tutorialActive(limit, false), false, 'na limitu už ne');
   assert.equal(tutorialActive(5, true), false, 'po splnění už nikdy');
+});
+
+test('nápověda Běž dál! se ukazuje, dokud zbývají její použití', () => {
+  assert.equal(runHintActive({ runHints: 3 }), true);
+  assert.equal(runHintActive({ runHints: 0 }), false);
 });

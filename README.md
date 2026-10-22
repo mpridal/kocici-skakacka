@@ -49,6 +49,7 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 | `obstacles.reactionTime` | rezerva na reakci mezi překážkami | 0.45 s |
 | `obstacles.extraGapMin` / `Max` | náhodná mezera navíc mezi překážkami | 0.2–1.2 s |
 | `obstacles.squirrelFromScore` | od kolika bodů létají veverky | 300 |
+| `obstacles.highLaneFromScore` | od kolika bodů létají veverky i vysoko (pod nimi se proběhne, nápověda „Běž dál!“ u prvních tří) | 600 |
 | `pickups.fishChance` | jak často se objeví rybičky | 0.5 |
 | `pickups.heartChance` | jak často se objeví srdíčko | 0.04 |
 | `dayNight.cyclePoints` | po kolika bodech se střídá den a noc | 700 |

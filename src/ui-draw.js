@@ -319,6 +319,23 @@ export function drawLevelUp(ctx, age, cx) {
 // Nápověda pro začátečníka: ručička ťuká (tap) nebo drží (hold) a velký nápis.
 export function drawHint(ctx, kind, t, cx) {
   if (!kind) return;
+  if (kind === 'run') {
+    // pod vysokou veverkou se neskáče – jen běžet dál (šipka vpřed se pohupuje)
+    ctx.save();
+    ctx.translate(cx, 300);
+    text(ctx, 'Běž dál!', 0, -70, 64, { color: '#2E8B57' });
+    const dx = Math.sin(t * 6) * 10;
+    ctx.fillStyle = '#AEDDA2';
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-50 + dx, 10); ctx.lineTo(10 + dx, 10); ctx.lineTo(10 + dx, -10); ctx.lineTo(50 + dx, 25);
+    ctx.lineTo(10 + dx, 60); ctx.lineTo(10 + dx, 40); ctx.lineTo(-50 + dx, 40); ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
   const hold = kind === 'hold';
   const press = hold ? Math.min(1, (t % 1.4) / 0.25) : Math.abs(Math.sin(t * 6));
   ctx.save();

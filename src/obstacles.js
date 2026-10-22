@@ -17,7 +17,7 @@ const DESPAWN_X = -200;
 function blankObstacle() {
   return {
     active: false, kind: 'avo-small', lane: null, look: 'squirrel', x: 0, w: 0, h: 0, bottom: 0,
-    spawnDistance: 0, blinkTimer: 0, blinkLeft: 0, animTime: 0,
+    spawnDistance: 0, passed: false, blinkTimer: 0, blinkLeft: 0, animTime: 0,
   };
 }
 
@@ -114,11 +114,13 @@ export function createSpawner(rng = Math.random, onGap = null) {
       const slot = pool.find((ob) => !ob.active);
       if (!slot) return; // plno – počká se na uvolnění
       const kind = pickKind(score);
-      makeObstacle(kind, kind === 'squirrel' ? LANES[Math.floor(rng() * 3)] : null, slot);
+      const laneCount = score >= o.highLaneFromScore ? 3 : 2; // vysoká dráha až později
+      makeObstacle(kind, kind === 'squirrel' ? LANES[Math.floor(rng() * laneCount)] : null, slot);
       slot.active = true;
       slot.x = spawnX;
       slot.spawnDistance = distance;
       slot.animTime = 0;
+      slot.passed = false;
       // v noci létá místo veverky netopýr (stejná dráha i kolize, jen jiný vzhled)
       slot.look = phaseName(dayPhase(score)) === 'night' ? 'bat' : 'squirrel';
       slot.blinkTimer = randomBlink(rng);

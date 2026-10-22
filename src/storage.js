@@ -20,6 +20,7 @@ function sanitize(raw) {
     tutorialDone: r.tutorialDone === true,
     totalFish: Number.isFinite(r.totalFish) && r.totalFish > 0 ? Math.floor(r.totalFish) : 0,
     accessory: ACCESSORY_IDS.includes(r.accessory) ? r.accessory : 'none',
+    runHints: Number.isInteger(r.runHints) && r.runHints >= 0 ? Math.min(r.runHints, CONFIG.tutorial.runHints) : CONFIG.tutorial.runHints,
   };
 }
 
@@ -48,7 +49,7 @@ export function createStorage(...args) {
     },
     getSettings: () => ({
       skin: state.skin, muted: state.muted, name: state.name, tutorialDone: state.tutorialDone,
-      totalFish: state.totalFish, accessory: state.accessory,
+      totalFish: state.totalFish, accessory: state.accessory, runHints: state.runHints,
     }),
     saveSettings(partial) {
       state = sanitize({ ...state, ...partial, name: cleanName(partial.name ?? state.name) });
