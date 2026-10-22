@@ -3,6 +3,9 @@
 export const LOGICAL_W = 1280;
 export const LOGICAL_H = 720;
 
+// Jeden herní den (den → večer → noc → ráno) v bodech. Na začátku každého dne hra zrychlí.
+const DAY_POINTS = 700;
+
 const deepFreeze = (o) => {
   Object.values(o).forEach((v) => { if (v && typeof v === 'object') deepFreeze(v); });
   return Object.freeze(o);
@@ -26,8 +29,8 @@ export const CONFIG = deepFreeze({
   speed: {
     start: 330,          // počáteční rychlost běhu (px/s)
     max: 730,            // strop rychlosti
-    levelEvery: 200,     // po kolika bodech přijde další úroveň (nápis „Rychleji!“)
-    levelStep: 30,       // o kolik px/s každá úroveň zrychlí
+    levelEvery: DAY_POINTS, // zrychlení jen na začátku nového herního dne (nápis „Den 2“, „Den 3“…)
+    levelStep: 100,      // o kolik px/s každý nový den zrychlí
     rampTime: 1,         // za kolik sekund se plynule rozjede na novou rychlost
   },
 
@@ -66,7 +69,7 @@ export const CONFIG = deepFreeze({
     heartScale: 2.2,
   },
 
-  dayNight: { cyclePoints: 700 },
+  dayNight: { cyclePoints: DAY_POINTS },
 
   tutorial: { untilScore: 150, runHints: 3 }, // runHints = kolikrát ukázat „Běž dál!“ u vysoké veverky // nápověda ťukni/podrž, dokud hráč jednou nedosáhne tolika bodů
 

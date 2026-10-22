@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.js';
 import { createGame, stepGame, resetGame } from '../src/game.js';
 import { makeObstacle } from '../src/obstacles.js';
+import * as DAYNIGHT from '../src/daynight.js';
 
 const noSpawn = () => 0.999; // RNG pro testy
 const dt = 1 / 60;
@@ -57,7 +58,7 @@ test('po každých levelEvery bodech hra zrychlí o krok a ohlásí to jednou', 
   g.distance = (sp.levelEvery + 1) / CONFIG.score.pointsPerPx;
   clearObstacles(g);
   stepGame(g, dt, false, false);
-  assert.ok(g.events.includes('levelUp'));
+  assert.ok(g.events.includes('newDay'));
   assert.equal(g.level, 1);
   const right = g.speed;
   assert.ok(right < sp.start + sp.levelStep, 'zrychlení je plynulé, ne skokové');
@@ -65,24 +66,26 @@ test('po každých levelEvery bodech hra zrychlí o krok a ohlásí to jednou', 
   for (let i = 0; i < 60 * (sp.rampTime + 0.5); i++) {
     clearObstacles(g);
     stepGame(g, dt, false, false);
-    if (g.events.includes('levelUp')) ups++;
+    if (g.events.includes('newDay')) ups++;
   }
   assert.equal(ups, 0);
   assert.equal(g.speed, sp.start + sp.levelStep);
 });
 
-test('rychlost nepřekročí strop a nad ním už nehlásí další úrovně', () => {
+test('rychlost nepřekročí strop, ale nové dny se hlásí dál', () => {
   const g = createGame(noSpawn);
   runAtScore(g, 1e6, 20); // rozjezd o všechny úrovně najednou trvá déle
   assert.equal(g.speed, CONFIG.speed.max);
   let ups = 0;
+  const base = g.score;
   for (let k = 1; k < 5; k++) {
-    g.distance = (1e6 + k * CONFIG.speed.levelEvery) / CONFIG.score.pointsPerPx;
+    g.distance = (base + k * CONFIG.speed.levelEvery) / CONFIG.score.pointsPerPx;
     clearObstacles(g);
     stepGame(g, dt, false, false);
-    if (g.events.includes('levelUp')) ups++;
+    if (g.events.includes('newDay')) ups++;
   }
-  assert.equal(ups, 0);
+  assert.equal(ups, 4, 'Den N i po dosažení stropu');
+  assert.equal(g.speed, CONFIG.speed.max);
 });
 
 test('zásah ubere život a dá dočasnou nezranitelnost', () => {
@@ -146,4 +149,27 @@ test('vysoká veverka, která proletí nad kočkou, se ohlásí jednou (pro náp
     passed += g.events.filter((e) => e === 'passedHigh').length;
   }
   assert.equal(passed, 1);
+});
+
+test('hra zrychluje jen na začátku nového herního dne', () => {
+  assert.equal(CONFIG.speed.levelEvery, CONFIG.dayNight.cyclePoints, 'úroveň = jeden herní den');
+  const { dayPhase, phaseName } = DAYNIGHT;
+  // začátek každého dne je den (ne noc ani přechod)
+  for (let d = 1; d < 6; d++) assert.equal(phaseName(dayPhase(d * CONFIG.speed.levelEvery)), 'day');
+  // uprostřed dne (večer, noc) žádné zrychlení
+  const g = createGame(noSpawn);
+  g.distance = (CONFIG.speed.levelEvery * 0.5) / CONFIG.score.pointsPerPx;
+  clearObstacles(g);
+  stepGame(g, dt, false, false);
+  assert.equal(g.level, 0);
+});
+
+test('nový den hlásí číslo dne pro nápis „Den N“', () => {
+  const g = createGame(noSpawn);
+  assert.equal(g.day, 1, 'hra začíná dnem 1');
+  g.distance = (CONFIG.speed.levelEvery + 1) / CONFIG.score.pointsPerPx;
+  clearObstacles(g);
+  stepGame(g, dt, false, false);
+  assert.ok(g.events.includes('newDay'));
+  assert.equal(g.day, 2);
 });

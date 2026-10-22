@@ -49,8 +49,8 @@ Všechna nastavení jsou v souboru [`src/config.js`](src/config.js). Nejdůleži
 |---|---|---|
 | `speed.start` | počáteční rychlost běhu | 330 |
 | `speed.max` | nejvyšší rychlost (strop) | 730 |
-| `speed.levelEvery` | po kolika bodech hra zrychlí (nápis „Rychleji!“) | 200 |
-| `speed.levelStep` | o kolik každá úroveň zrychlí | 30 |
+| `speed.levelEvery` | hra zrychlí na začátku každého herního dne (nápis „Den 2“, „Den 3“…) | 700 (= jeden den) |
+| `speed.levelStep` | o kolik každý nový den zrychlí | 100 |
 | `cat.jumpVelocity` | síla odrazu (výška skoku) | 980 |
 | `cat.maxHoldTime` | jak dlouho jde skok prodlužovat držením | 0.3 s |
 | `cat.hitboxShrinkX` / `Y` | o kolik je kolize shovívavější než obrázek | 0.4 / 0.25 |

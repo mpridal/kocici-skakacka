@@ -7,7 +7,7 @@ import { createGame, stepGame, resetGame } from './game.js';
 import { catHitbox } from './cat.js';
 import { obstacleHitbox } from './obstacles.js';
 import { createUI, layoutButtons } from './ui.js';
-import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawHint, drawBye, NAME_BOX, DIM } from './ui-draw.js';
+import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawDayBanner, drawHint, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
 import { hintFor, tutorialActive, runHintActive } from './tutorial.js';
@@ -38,7 +38,7 @@ const startRun = () => {
   resetGame(game);
   hitAt = -1e9;
   audio.setTempo(1);
-  levelUpAt = -1e9;
+  dayBannerAt = performance.now(); // na začátku hry „Den 1“
   clearEffects(effects);
   audio.startMusic();
 };
@@ -257,7 +257,7 @@ function draw(now) {
     if (debugBoxes) drawDebugBoxes();
     if (ui.screen === 'playing') {
       drawHud(ctx, game, ui);
-      drawLevelUp(ctx, (now - levelUpAt) / 1000, vp.logicalW / 2);
+      drawDayBanner(ctx, (now - dayBannerAt) / 1000, vp.logicalW / 2, game.day);
       const hint = hintFor(game);
       const showHint = hint === 'run' ? runHintActive(ui.settings) : tutorialActive(game.score, ui.settings.tutorialDone);
       if (showHint) drawHint(ctx, hint, t, vp.logicalW / 2);
@@ -302,12 +302,12 @@ function drawHitFlash(alpha) {
 }
 
 // ---------- smyčka ----------
-let levelUpAt = -1e9;
+let dayBannerAt = -1e9;
 let hitAt = -1e9;
 const fx = { dx: 0, dy: 0, flash: 0 };
 function handleEvents(now) {
   for (const e of game.events) {
-    if (e === 'levelUp') { levelUpAt = now; audio.play('levelUp'); }
+    if (e === 'newDay') { dayBannerAt = now; audio.play('levelUp'); } // nový den – nápis „Den N“
     if (e === 'passedHigh' && ui.settings.runHints > 0) {
       storage.saveSettings({ runHints: ui.settings.runHints - 1 }); // „Běž dál!“ jen prvních pár setkání
       ui.settings = storage.getSettings();

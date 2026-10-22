@@ -16,6 +16,7 @@ export function createGame(rng = Math.random) {
     invuln: 0,
     speed: 0,
     level: 0,
+    day: 1, // herní den (1, 2, 3…) – nápis „Den N“
     viewW: LOGICAL_W, // logická šířka displeje (nastavuje main.js)
     time: 0,
     cat: createCat(),
@@ -44,6 +45,7 @@ export function resetGame(game) {
   game.invuln = 0;
   game.speed = CONFIG.speed.start;
   game.level = 0;
+  game.day = 1;
   game.time = 0;
   Object.assign(game.cat, createCat());
   for (const o of game.obstacles) o.active = false;
@@ -56,15 +58,16 @@ function updateScore(game) {
   game.score = Math.floor(game.distance * CONFIG.score.pointsPerPx) + game.fish * CONFIG.score.fish + game.bonus;
 }
 
-// Rychlost po úrovních: každých levelEvery bodů o levelStep víc, plynule za rampTime, do stropu.
+// Rychlost po dnech: na začátku každého herního dne o levelStep víc, plynule za rampTime, do stropu.
 const MAX_LEVEL = Math.ceil((CONFIG.speed.max - CONFIG.speed.start) / CONFIG.speed.levelStep);
 function updateSpeed(game, dt) {
   const s = CONFIG.speed;
-  const level = Math.min(MAX_LEVEL, Math.floor(game.score / s.levelEvery));
-  if (level > game.level) {
-    game.level = level;
-    game.events.push('levelUp');
+  const day = Math.floor(game.score / s.levelEvery) + 1;
+  if (day > game.day) {
+    game.day = day;
+    game.events.push('newDay'); // nový herní den – hlásí se i po dosažení stropu rychlosti
   }
+  game.level = Math.min(MAX_LEVEL, day - 1);
   const target = Math.min(s.max, s.start + game.level * s.levelStep);
   game.speed = Math.min(target, game.speed + (s.levelStep / s.rampTime) * dt);
 }

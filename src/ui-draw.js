@@ -314,19 +314,19 @@ export function drawIntro(ctx, ui, best, t) {
   text(ctx, String(best), 118 + L, 70 + ui.safe.t, 48, { align: 'left' });
 }
 
-// Nápis „Rychleji!“ po zrychlení: krátce vyskočí a zmizí. age = sekundy od zrychlení.
-export function drawLevelUp(ctx, age, cx) {
-  if (age < 0 || age > 1.6) return;
+// Nápis „Den N“ na začátku každého herního dne (tehdy hra zrychlí): vyskočí a zmizí.
+// age = sekundy od začátku dne.
+export function drawDayBanner(ctx, age, cx, day) {
+  if (age < 0 || age > 1.8) return;
   const pop = age < 0.25 ? 0.6 + (age / 0.25) * 0.5 : age < 0.4 ? 1.1 - ((age - 0.25) / 0.15) * 0.1 : 1;
   ctx.save();
-  ctx.globalAlpha = age > 1.2 ? 1 - (age - 1.2) / 0.4 : 1;
-  ctx.translate(cx, 250);
+  ctx.globalAlpha = age > 1.4 ? 1 - (age - 1.4) / 0.4 : 1;
+  ctx.translate(cx, 150); // nad nápovědou Ťukni / Podrž
   ctx.scale(pop, pop);
-  text(ctx, 'Rychleji!', 0, 0, 84, { color: '#FF7590' });
+  text(ctx, `Den ${day}`, 0, 0, 84, { color: '#FF7590' });
   ctx.restore();
 }
 
-// Nápověda pro začátečníka: ručička ťuká (tap) nebo drží (hold) a velký nápis.
 export function drawHint(ctx, kind, t, cx) {
   if (!kind) return;
   if (kind === 'run') {
