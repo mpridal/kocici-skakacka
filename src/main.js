@@ -265,15 +265,23 @@ function draw(now) {
 }
 
 // Zčervenání okrajů obrazovky při zásahu (přes celé plátno).
+// Přechod se vytvoří jen jednou pro danou velikost plátna; síla zčervenání jde přes globalAlpha.
+let flashGradient = null;
+let flashKey = '';
 function drawHitFlash(alpha) {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const w = canvas.width;
   const h = canvas.height;
-  const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.hypot(w, h) / 2);
-  g.addColorStop(0, 'rgba(255,90,119,0)');
-  g.addColorStop(1, `rgba(255,90,119,${alpha})`);
-  ctx.fillStyle = g;
+  const key = `${w}x${h}`;
+  if (key !== flashKey) {
+    flashKey = key;
+    flashGradient = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.3, w / 2, h / 2, Math.hypot(w, h) / 2);
+    flashGradient.addColorStop(0, 'rgba(255,90,119,0)');
+    flashGradient.addColorStop(1, 'rgba(255,90,119,1)');
+  }
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = flashGradient;
   ctx.fillRect(0, 0, w, h);
   ctx.restore();
 }

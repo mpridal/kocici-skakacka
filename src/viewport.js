@@ -4,8 +4,10 @@
 import { LOGICAL_W, LOGICAL_H } from './config.js';
 
 export const MAX_LOGICAL_W = 1728; // 21,6 : 9
+export const MAX_DPR = 2; // víc ostrosti oko nepozná, ale slabý telefon by kreslil zbytečně moc pixelů
 
-export function computeViewport(cssW, cssH, dpr) {
+export function computeViewport(cssW, cssH, rawDpr) {
+  const dpr = Math.min(rawDpr, MAX_DPR);
   const logicalW = Math.round(Math.min(MAX_LOGICAL_W, Math.max(LOGICAL_W, (cssW / cssH) * LOGICAL_H)));
   const scale = Math.min(cssW / logicalW, cssH / LOGICAL_H);
   return {

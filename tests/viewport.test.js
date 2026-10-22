@@ -51,3 +51,10 @@ test('extrémně široký displej má strop šířky a zbytek vycentruje', () =>
   assert.equal(vp.logicalW, MAX_LOGICAL_W);
   assert.ok(vp.offsetX > 0);
 });
+
+test('rozlišení plátna je omezené (šetří výkon slabších telefonů)', () => {
+  const vp = computeViewport(915, 412, 2.75);
+  assert.equal(vp.dpr, 2);
+  assert.equal(vp.canvasW, 1830);
+  assert.equal(computeViewport(1280, 800, 1).dpr, 1);
+});
