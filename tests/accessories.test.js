@@ -9,19 +9,20 @@ const ids = (list) => list.map((a) => a.id);
 
 test('bez rybiček je dostupné jen „nic“, ozdoby se odemykají podle celkového počtu rybiček', () => {
   assert.deepEqual(ids(unlockedAccessories(0)), ['none']);
-  assert.deepEqual(ids(unlockedAccessories(63)), ['none', 'bow']);
+  assert.deepEqual(ids(unlockedAccessories(10)), ['none', 'bow']);
   assert.deepEqual(ids(unlockedAccessories(1000)), CONFIG.accessories.map((a) => a.id));
 });
 
 test('ukazatel další ozdoby', () => {
-  assert.deepEqual(nextUnlock(12), { id: 'bow', label: 'Mašle', remaining: 48, need: 60 });
+  assert.deepEqual(nextUnlock(4), { id: 'bow', label: 'Mašle', remaining: 6, need: 10 });
+  assert.deepEqual(nextUnlock(12), { id: 'glasses', label: 'Brýle', remaining: 18, need: 30 });
   assert.equal(nextUnlock(1000), null);
 });
 
 test('nově odemčená ozdoba po hře', () => {
-  assert.equal(newlyUnlocked(55, 70).id, 'bow');
-  assert.equal(newlyUnlocked(64, 100), null);
-  assert.equal(newlyUnlocked(100, 200).id, 'flower', 'při přeskočení více prahů se ukáže ta nejvyšší');
+  assert.equal(newlyUnlocked(5, 12).id, 'bow');
+  assert.equal(newlyUnlocked(11, 25), null);
+  assert.equal(newlyUnlocked(20, 70).id, 'flower', 'při přeskočení více prahů se ukáže ta nejvyšší');
 });
 
 test('úložiště drží celkový počet rybiček a vybranou ozdobu', () => {
@@ -38,7 +39,7 @@ test('úložiště drží celkový počet rybiček a vybranou ozdobu', () => {
 
 test('tlačítko ozdoby na úvodu přepíná jen mezi odemčenými', () => {
   const s = createStorage(undefined);
-  s.saveSettings({ totalFish: 130 });
+  s.saveSettings({ totalFish: 35 });
   const ui = createUI(s, {});
   const b = layoutButtons('intro').find((x) => x.id === 'acc');
   assert.ok(b, 'na úvodu je tlačítko ozdoby');
@@ -56,20 +57,19 @@ test('konec hry si pamatuje nově odemčenou ozdobu', () => {
   assert.equal(ui.unlocked, null);
 });
 
-test('k odměnám přibyla maska, knír a sukýnka a prahy stoupají', () => {
-  const list = CONFIG.accessories;
-  for (const id of ['mask', 'mustache', 'skirt']) assert.ok(list.some((a) => a.id === id), `chybí ${id}`);
-  for (let i = 1; i < list.length; i++) assert.ok(list[i].fish > list[i - 1].fish, 'prahy stoupají');
-  assert.equal(nextUnlock(260).id, 'mask');
+test('odměny bez sukýnky: první brzy, pak se latka postupně zvedá až do 350', () => {
+  const rewards = CONFIG.accessories.filter((x) => x.id !== 'none');
+  assert.deepEqual(rewards.map((x) => [x.id, x.fish]), [
+    ['bow', 10], ['glasses', 30], ['flower', 60], ['crown', 100], ['mask', 160], ['mustache', 240], ['phone', 350],
+  ]);
+  assert.equal(rewards.some((x) => x.id === 'skirt'), false, 'sukýnka je zrušená');
+  for (let i = 2; i < rewards.length; i++) {
+    assert.ok(rewards[i].fish - rewards[i - 1].fish >= rewards[i - 1].fish - (rewards[i - 2]?.fish ?? 0), 'rozestupy rostou');
+  }
 });
 
-test('mezi odměnami je mobil a prahy jsou rovnoměrně rozložené až do 500 rybiček', () => {
-  const rewards = CONFIG.accessories.filter((a) => a.id !== 'none');
-  assert.ok(rewards.some((a) => a.id === 'phone'), 'chybí mobil');
-  assert.equal(rewards[rewards.length - 1].fish, 500);
-  const step = 500 / rewards.length;
-  rewards.forEach((a, i) => {
-    assert.equal(a.fish % 10, 0, `${a.id}: ${a.fish} není na celé desítky`);
-    assert.ok(Math.abs(a.fish - step * (i + 1)) <= 5, `${a.id}: ${a.fish}`);
-  });
+test('uložená sukýnka se po zrušení změní na „bez ozdoby“', () => {
+  const s = createStorage(undefined);
+  s.saveSettings({ accessory: 'skirt' });
+  assert.equal(s.getSettings().accessory, 'none');
 });

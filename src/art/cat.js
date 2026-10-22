@@ -71,36 +71,6 @@ export function drawAccessory(ctx, id, eye = '#3A3238') {
     ctx.bezierCurveTo(54, -33, 49, -33.5, 46, -31);
     ctx.closePath();
     ctx.fill();
-  } else if (id === 'skirt') {
-    // načechraná růžová sukýnka (tutu): nahoře pásek, dole se rozšiřuje přes obrys těla
-    ctx.fillStyle = '#FFB3C7';
-    ctx.beginPath();
-    ctx.moveTo(-22, -22);
-    ctx.lineTo(32, -22);
-    ctx.lineTo(44, -7);
-    const n = 8;
-    const step = (44 + 34) / n;
-    for (let i = 0; i < n; i++) {
-      const x0 = 44 - i * step;
-      ctx.quadraticCurveTo(x0 - step / 2, 3, x0 - step, -7);
-    }
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.strokeStyle = '#FF9AB0';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    for (let i = 1; i < n; i++) {
-      const x = 44 - i * step;
-      ctx.moveTo(x, -7);
-      ctx.lineTo(x * 0.72 + 4, -20);
-    }
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(-22, -22); ctx.lineTo(32, -22);
-    ctx.strokeStyle = '#FF7590';
-    ctx.lineWidth = 3.4;
-    ctx.stroke();
   } else if (id === 'phone') {
     // mobil u ucha – kočička telefonuje
     ctx.save();
@@ -132,7 +102,7 @@ export function drawAccessoryIcon(ctx, id, cx, cy, size) {
   // [střed x, střed y, šířka] ozdoby v souřadnicích kočky
   const box = {
     bow: [48, -61, 15], glasses: [43, -38.5, 30], flower: [26, -57, 13], crown: [40, -62.5, 19],
-    mask: [44, -38, 36], mustache: [46, -31, 23], skirt: [5, -10, 82], phone: [60, -38, 16],
+    mask: [44, -38, 36], mustache: [46, -31, 23], phone: [60, -38, 16],
   };
   const c = box[id];
   if (!c) return;

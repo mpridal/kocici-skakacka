@@ -8,14 +8,6 @@ const deepFreeze = (o) => {
   return Object.freeze(o);
 };
 
-// Rovnoměrné prahy odměn zaokrouhlené na celé desítky: i-tá ozdoba za ≈ max * i / počet rybiček.
-function rewards(maxFish, list) {
-  return [
-    { id: 'none', label: 'Bez ozdoby', fish: 0 },
-    ...list.map(([id, label], i) => ({ id, label, fish: Math.round((maxFish * (i + 1)) / list.length / 10) * 10 })),
-  ];
-}
-
 export const CONFIG = deepFreeze({
   maxDt: 1 / 30,        // delší snímek (např. po návratu z pozadí) se ořízne
   groundY: 600,         // výška země na obrazovce
@@ -80,11 +72,18 @@ export const CONFIG = deepFreeze({
 
   ui: { gameOverDelay: 1, parentHoldTime: 2, nameMaxLength: 12 },
 
-  // Ozdoby: odemykají se rovnoměrně podle celkového počtu rybiček, poslední při REWARDS_MAX_FISH.
-  accessories: rewards(500, [
-    ['bow', 'Mašle'], ['glasses', 'Brýle'], ['flower', 'Kytička'], ['crown', 'Korunka'],
-    ['mask', 'Maska'], ['mustache', 'Knír'], ['skirt', 'Sukýnka'], ['phone', 'Mobil'],
-  ]),
+  // Ozdoby a kolik rybiček celkem je k nim potřeba: první brzy (i slabší hráč ji
+  // dostane po 1–2 hrách), pak se latka postupně zvedá.
+  accessories: [
+    { id: 'none', label: 'Bez ozdoby', fish: 0 },
+    { id: 'bow', label: 'Mašle', fish: 10 },
+    { id: 'glasses', label: 'Brýle', fish: 30 },
+    { id: 'flower', label: 'Kytička', fish: 60 },
+    { id: 'crown', label: 'Korunka', fish: 100 },
+    { id: 'mask', label: 'Maska', fish: 160 },
+    { id: 'mustache', label: 'Knír', fish: 240 },
+    { id: 'phone', label: 'Mobil', fish: 350 },
+  ],
 
   skins: [
     { id: 'mourek', label: 'Pusheen', fur: '#B9BAC2', stripe: '#6F717C', eye: '#3A3238' },

@@ -43,7 +43,7 @@ test('po odchodu do pozadí a návratu se připíšou i další rybičky a rekor
 
 test('připsání vrátí nově odemčenou ozdobu', () => {
   const s = createStorage(undefined);
-  s.saveSettings({ totalFish: 55 });
+  s.saveSettings({ totalFish: 5 });
   const r = creditRun(run(10, 50), s);
   assert.equal(r.unlocked.id, 'bow');
 });
