@@ -8,11 +8,11 @@ const deepFreeze = (o) => {
   return Object.freeze(o);
 };
 
-// Rovnoměrné prahy odměn: i-tá ozdoba za round(max * i / počet) rybiček.
+// Rovnoměrné prahy odměn zaokrouhlené na celé desítky: i-tá ozdoba za ≈ max * i / počet rybiček.
 function rewards(maxFish, list) {
   return [
     { id: 'none', label: 'Bez ozdoby', fish: 0 },
-    ...list.map(([id, label], i) => ({ id, label, fish: Math.round((maxFish * (i + 1)) / list.length) })),
+    ...list.map(([id, label], i) => ({ id, label, fish: Math.round((maxFish * (i + 1)) / list.length / 10) * 10 })),
   ];
 }
 

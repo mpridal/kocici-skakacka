@@ -14,7 +14,7 @@ test('bez rybiček je dostupné jen „nic“, ozdoby se odemykají podle celkov
 });
 
 test('ukazatel další ozdoby', () => {
-  assert.deepEqual(nextUnlock(12), { id: 'bow', label: 'Mašle', remaining: 51, need: 63 });
+  assert.deepEqual(nextUnlock(12), { id: 'bow', label: 'Mašle', remaining: 48, need: 60 });
   assert.equal(nextUnlock(1000), null);
 });
 
@@ -68,5 +68,8 @@ test('mezi odměnami je mobil a prahy jsou rovnoměrně rozložené až do 500 r
   assert.ok(rewards.some((a) => a.id === 'phone'), 'chybí mobil');
   assert.equal(rewards[rewards.length - 1].fish, 500);
   const step = 500 / rewards.length;
-  rewards.forEach((a, i) => assert.ok(Math.abs(a.fish - step * (i + 1)) <= 0.5, `${a.id}: ${a.fish}`));
+  rewards.forEach((a, i) => {
+    assert.equal(a.fish % 10, 0, `${a.id}: ${a.fish} není na celé desítky`);
+    assert.ok(Math.abs(a.fish - step * (i + 1)) <= 5, `${a.id}: ${a.fish}`);
+  });
 });
