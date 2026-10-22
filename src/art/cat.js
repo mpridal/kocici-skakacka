@@ -101,6 +101,22 @@ export function drawAccessory(ctx, id, eye = '#3A3238') {
     ctx.strokeStyle = '#FF7590';
     ctx.lineWidth = 3.4;
     ctx.stroke();
+  } else if (id === 'phone') {
+    // mobil u ucha – kočička telefonuje
+    ctx.save();
+    ctx.translate(61, -39);
+    ctx.rotate(0.18);
+    ctx.beginPath();
+    ctx.roundRect(-4.5, -9, 9, 18, 2.2);
+    ctx.fillStyle = '#FF9AB0';
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.roundRect(-3, -7, 6, 12, 1);
+    ctx.fillStyle = '#B6DDF7';
+    ctx.fill();
+    ellipse(ctx, 0, 7, 0.9, 0.9, OUTLINE);
+    ctx.restore();
   } else if (id === 'crown') {
     ctx.fillStyle = '#FFD45E';
     ctx.beginPath();
@@ -116,7 +132,7 @@ export function drawAccessoryIcon(ctx, id, cx, cy, size) {
   // [střed x, střed y, šířka] ozdoby v souřadnicích kočky
   const box = {
     bow: [48, -61, 15], glasses: [43, -38.5, 30], flower: [26, -57, 13], crown: [40, -62.5, 19],
-    mask: [44, -38, 36], mustache: [46, -31, 23], skirt: [5, -10, 82],
+    mask: [44, -38, 36], mustache: [46, -31, 23], skirt: [5, -10, 82], phone: [60, -38, 16],
   };
   const c = box[id];
   if (!c) return;
