@@ -15,3 +15,8 @@ export function hintFor(game) {
   if (nearest.kind === 'squirrel' && nearest.lane === 'high') return null;
   return nearest.kind === 'avo-pair' || (nearest.kind === 'squirrel' && nearest.lane === 'mid') ? 'hold' : 'tap';
 }
+
+// Nápověda běží jen do prvního dosažení limitu – hned na něm zmizí (i uprostřed hry).
+export function tutorialActive(score, done) {
+  return !done && score < CONFIG.tutorial.untilScore;
+}

@@ -10,7 +10,7 @@ import { createUI, layoutButtons } from './ui.js';
 import { drawIntro, drawHud, drawPaused, drawOver, drawParent, drawRotate, drawLevelUp, drawHint, drawBye, NAME_BOX, DIM } from './ui-draw.js';
 import { drawObstacle, drawGameCat, drawPickup } from './art/scene.js';
 import { createAudio, tempoForSpeed } from './audio.js';
-import { hintFor } from './tutorial.js';
+import { hintFor, tutorialActive } from './tutorial.js';
 import { newlyUnlocked } from './accessories.js';
 import { startAutoUpdate } from './update.js';
 import { vibrateFor } from './haptics.js';
@@ -229,7 +229,7 @@ function draw(now) {
     if (ui.screen === 'playing') {
       drawHud(ctx, game, ui);
       drawLevelUp(ctx, (now - levelUpAt) / 1000, vp.logicalW / 2);
-      if (!ui.settings.tutorialDone) drawHint(ctx, hintFor(game), t, vp.logicalW / 2);
+      if (tutorialActive(game.score, ui.settings.tutorialDone)) drawHint(ctx, hintFor(game), t, vp.logicalW / 2);
     }
   }
   ctx.restore();
@@ -285,10 +285,6 @@ function handleEvents(now) {
       storage.saveSettings({ totalFish: before + game.fish });
       ui.settings = storage.getSettings();
       const unlocked = newlyUnlocked(before, ui.settings.totalFish);
-      if (game.score >= CONFIG.tutorial.untilScore && !ui.settings.tutorialDone) {
-        storage.saveSettings({ tutorialDone: true });
-        ui.settings = storage.getSettings();
-      }
       ui.gameOver(now, record, unlocked);
       if (unlocked) audio.play('heart');
       if (record) {
@@ -306,6 +302,10 @@ function frame(now) {
   ui.update(now);
   if (ui.screen === 'playing' && !vp.portrait) {
     stepGame(game, dt, input.held, input.consumePress());
+    if (!ui.settings.tutorialDone && !tutorialActive(game.score, false)) {
+      storage.saveSettings({ tutorialDone: true }); // limit dosažen → nápověda už nikdy
+      ui.settings = storage.getSettings();
+    }
     audio.setTempo(tempoForSpeed(game.speed));
     handleEvents(now);
   } else {

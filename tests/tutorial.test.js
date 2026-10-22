@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.js';
 import { createGame } from '../src/game.js';
 import { makeObstacle } from '../src/obstacles.js';
-import { hintFor } from '../src/tutorial.js';
+import { hintFor, tutorialActive } from '../src/tutorial.js';
 import { createStorage } from '../src/storage.js';
 
 function gameWith(kind, lane, distanceAhead) {
@@ -42,4 +42,12 @@ test('nápověda se vypne, až hráč jednou dosáhne potřebného skóre', () =
   assert.equal(s.getSettings().tutorialDone, false);
   s.saveSettings({ tutorialDone: true });
   assert.equal(s.getSettings().tutorialDone, true);
+});
+
+test('nápověda zmizí hned po dosažení limitu, ne až v další hře', () => {
+  const limit = CONFIG.tutorial.untilScore;
+  assert.equal(tutorialActive(0, false), true);
+  assert.equal(tutorialActive(limit - 1, false), true);
+  assert.equal(tutorialActive(limit, false), false, 'na limitu už ne');
+  assert.equal(tutorialActive(5, true), false, 'po splnění už nikdy');
 });
