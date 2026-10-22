@@ -30,7 +30,7 @@ export const CONFIG = deepFreeze({
     start: 330,          // počáteční rychlost běhu (px/s)
     max: 730,            // strop rychlosti
     levelEvery: DAY_POINTS, // zrychlení jen na začátku nového herního dne (nápis „Den 2“, „Den 3“…)
-    levelStep: 100,      // o kolik px/s každý nový den zrychlí
+    levelStep: 67,       // o kolik px/s každý nový den zrychlí (strop rychlosti v 7. dnu)
     rampTime: 1,         // za kolik sekund se plynule rozjede na novou rychlost
   },
 

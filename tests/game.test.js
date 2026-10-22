@@ -173,3 +173,10 @@ test('nový den hlásí číslo dne pro nápis „Den N“', () => {
   assert.ok(g.events.includes('newDay'));
   assert.equal(g.day, 2);
 });
+
+test('zrychlování končí 7. dnem', () => {
+  const sp = CONFIG.speed;
+  const speedOnDay = (d) => Math.min(sp.max, sp.start + (d - 1) * sp.levelStep);
+  assert.ok(speedOnDay(6) < sp.max, '6. den ještě není strop');
+  assert.equal(speedOnDay(7), sp.max, '7. den je strop');
+});
