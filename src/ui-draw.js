@@ -16,8 +16,17 @@ const BTN = {
 };
 const LABEL = { stay: 'Hrát dál', exit: 'Konec', play: 'Hraj!', again: 'Znovu', resume: 'Pokračovat', home: 'Domů', save: 'Uložit', back: 'Zpět' };
 
+// Řetězce fontů se skládají jen jednou (méně práce v herní smyčce).
+const fontCache = new Map();
+function font(weight, size) {
+  const key = weight * 1000 + size;
+  let f = fontCache.get(key);
+  if (!f) { f = `${weight} ${size}px ${FONT}`; fontCache.set(key, f); }
+  return f;
+}
+
 export function text(ctx, s, x, y, size, { color = TEXT, align = 'center', outline = '#FFFFFF', weight = 800 } = {}) {
-  ctx.font = `${weight} ${size}px ${FONT}`;
+  ctx.font = font(weight, size);
   ctx.textAlign = align;
   ctx.textBaseline = 'middle';
   if (outline) {

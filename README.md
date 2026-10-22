@@ -23,6 +23,16 @@ Jednoduchá hra pro děti na Android tablet. Kočička běží, skáče přes av
 3. V menu Chrome (⋮) zvolte **Přidat na plochu** nebo **Nainstalovat aplikaci**.
 4. Hru pak spouštějte ikonou kočičky na ploše. Funguje i v režimu letadlo.
 
+### Dětský účet s rodičovskou kontrolou (Google Family Link)
+
+Na telefonu nebo tabletu s dětským účtem:
+
+1. V aplikaci **Family Link** na rodičovském telefonu: dítě → **Ovládací prvky** → **Google Chrome a web** → **Spravovat weby → Schválené** → přidat doménu **`mpridal.github.io`**. Zadejte doménu, ne celou adresu hry – pravidlo pro jednu adresu by nepovolilo ostatní soubory hry.
+2. Pak na zařízení dítěte otevřete hru přímo v **Chrome** (ne z odkazu v jiné aplikaci) a nainstalujte ji přes ⋮ → **Přidat na plochu / Nainstalovat**.
+3. Pokud se nainstalovaná aplikace nespustí nebo se hned zavře, zapněte na zařízení **automatické otáčení displeje**.
+4. Vibrace se řídí nastavením telefonu (intenzita, Nerušit, šetřič baterie) – hra si je vynutit nemůže. Při zásahu se proto obraz vždy i zatřese a okraje zčervenají.
+5. Na některých telefonech **Xiaomi / Redmi (HyperOS)** Chrome volbu „Přidat na plochu“ vůbec nenabízí (ani u jiných webů). Pak lze hrát v Chrome přes záložku – hra funguje i offline.
+
 ### 3. Jméno dítěte
 
 Na úvodní obrazovce je vpravo dole malé ozubené kolečko. **Podržte ho asi 2 sekundy.** Otevře se okno pro rodiče, kde jde zadat jméno (max. 12 znaků). Hra pak dítě pozdraví a pochválí při rekordu. Jméno se ukládá jen v tabletu, nikam se neodesílá.
@@ -63,7 +73,7 @@ Po úpravě spusťte testy (`npm test`), které hlídají, že hra zůstane fér
 ## Pro vývoj
 
 - `npm run serve` spustí místní server na http://localhost:8080/.
-- `npm test` spustí testy (Node 22+ bez dalších balíčků).
+- `npm test` spustí testy (Node 24 – stejně jako na GitHubu; bez dalších balíčků).
 - `node tools/install-hook.mjs` jednou nainstaluje kontrolu, že se jméno dítěte nedostane do commitu (zakázaná slova jsou v souboru `.private-names`, který git nesleduje).
 - Užitečné parametry adresy: `?nosw` (bez offline cache), `?boxes` (zobrazí kolizní boxy), `?fast` (rychlé střídání dne a noci).
 - `tools/gallery.html` ukáže všechny postavičky a animace. `tools/make-icons.html?save` znovu vyrobí ikony.
