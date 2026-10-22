@@ -251,6 +251,31 @@ function drawAccButton(ctx, b, ui) {
   text(ctx, next ? `${ui.settings.totalFish}/${next.need}` : String(ui.settings.totalFish), b.x + 54, b.y + b.h + 32, 26, { align: 'left' });
 }
 
+// Bublina se jménem kočičky – jako by se sama představila (ocásek míří k hlavě).
+function nameBubble(ctx, name, x, y) {
+  ctx.font = `800 34px ${FONT}`;
+  const w = ctx.measureText(name).width + 44;
+  const h = 56;
+  const left = x - w / 2;
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = OUTLINE;
+  ctx.fillStyle = '#FFFFFF';
+  // nejdřív ocásek, pak bublina přes jeho kořen (žádná přerušená čára)
+  ctx.beginPath();
+  ctx.moveTo(left + 22, y + h / 2 - 8);
+  ctx.lineTo(left - 14, y + h / 2 + 18);
+  ctx.lineTo(left + 46, y + h / 2 - 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(left, y - h / 2, w, h, 26);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillRect(left + 20, y + h / 2 - 6, 28, 4); // spojit bublinu s ocáskem
+  text(ctx, name, x, y + 2, 34, { outline: null, color: '#D4537E' });
+}
+
 // ---------- obrazovky ----------
 // Posun středu obrazovky proti základní šířce 1280 (širší displeje).
 const centerShift = (ui) => (ui.viewW - LOGICAL_W) / 2;
@@ -300,7 +325,7 @@ export function drawIntro(ctx, ui, best, t) {
       button(ctx, b, ui);
     }
   }
-  text(ctx, CONFIG.skins[ui.skinIndex].label, cx, 590 - 14, 30, { color: '#6F717C' });
+  nameBubble(ctx, CONFIG.skins[ui.skinIndex].label, cx + 265, 236);
 
   iconTrophy(ctx, 70, 66, 70);
   text(ctx, String(best), 118, 70, 48, { align: 'left' });

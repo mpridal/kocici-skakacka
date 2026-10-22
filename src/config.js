@@ -81,10 +81,10 @@ export const CONFIG = deepFreeze({
   ],
 
   skins: [
-    { id: 'mourek', label: 'Mourek', fur: '#B9BAC2', stripe: '#6F717C', eye: '#3A3238' },
-    { id: 'zrzka', label: 'Zrzka', fur: '#F6B26B', stripe: '#E08A3C', eye: '#3A3238' },
-    { id: 'cerna', label: 'Černá', fur: '#3F3A45', stripe: '#2C2830', eye: '#F4E7B0' },
-    { id: 'bila', label: 'Bílá', fur: '#FBF8F3', stripe: '#E6DED2', eye: '#3A3238' },
-    { id: 'pohadkova', label: 'Pohádková', fur: '#DDB3F2', stripe: '#B98AE0', eye: '#3A3238' },
+    { id: 'mourek', label: 'Pusheen', fur: '#B9BAC2', stripe: '#6F717C', eye: '#3A3238' },
+    { id: 'zrzka', label: 'Perníček', fur: '#F6B26B', stripe: '#E08A3C', eye: '#3A3238' },
+    { id: 'cerna', label: 'Tulísek', fur: '#3F3A45', stripe: '#2C2830', eye: '#F4E7B0' },
+    { id: 'bila', label: 'Sněhulka', fur: '#FBF8F3', stripe: '#E6DED2', eye: '#3A3238' },
+    { id: 'pohadkova', label: 'Mašlička', fur: '#DDB3F2', stripe: '#B98AE0', eye: '#3A3238' },
   ],
 });

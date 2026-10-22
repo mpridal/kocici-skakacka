@@ -196,3 +196,10 @@ test('v pauze je tlačítko Konec a po neúspěšném zavření se vrátí do pa
   ui.pointerDown(...center(btn('bye', 'stay')), 3000);
   assert.equal(ui.screen, 'paused', 'Hrát dál vrátí do rozehrané hry v pauze');
 });
+
+test('kočičky mají svá jména', () => {
+  const names = Object.fromEntries(CONFIG.skins.map((s) => [s.id, s.label]));
+  assert.deepEqual(names, {
+    mourek: 'Pusheen', zrzka: 'Perníček', cerna: 'Tulísek', bila: 'Sněhulka', pohadkova: 'Mašlička',
+  });
+});
